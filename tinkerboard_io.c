@@ -96,14 +96,12 @@ uint32_t _read_mem(volatile uint32_t* mem_addr) {
 	return ret;
 }
 
-uint32_t _set_bit(uint32_t value, uint8_t bit) {
-	value |= 1 << bit;
-	return value;
+void _set_bit(uint32_t* value, uint8_t bit) {
+	*value |= 1 << bit;
 }
 
-uint32_t _clear_bit(uint32_t value, uint8_t bit) {
-	value &= ~(1 << bit);
-	return value;
+void _clear_bit(uint32_t* value, uint8_t bit) {
+	*value &= ~(1 << bit);
 }
 
 void tinkerboard_set_gpio_mode(uint8_t pin_number, enum IOMode mode) {
@@ -129,13 +127,29 @@ void reset_header(void) {
 	for(uint8_t i = 0; i < 40; i++) {
 		if(_gpio_header_pins[i].is_gpio && i != 6) {
 			uint32_t register_data = _read_mem(_rk3288_gpio_grf_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].grf_bank_offset));
-			printf("IOMux register of pin %d contains: %08X\n", i, register_data);
+			//printf("IOMux register of pin %d contains: %08X\n", i, register_data);
 			for(uint8_t j = 0; j < _gpio_header_pins[i].grf_config_size; j++) {
-				_clear_bit(register_data, _gpio_header_pins[i].grf_pin_offset + j);
-				_set_bit(register_data, _gpio_header_pins[i].grf_pin_offset + j + 16);
+				_clear_bit(&register_data, _gpio_header_pins[i].grf_pin_offset + j);
+				_set_bit(&register_data, _gpio_header_pins[i].grf_pin_offset + j + RK3288_GRF_WRITEMASK_OFFSET);
 			}
-			printf("IOMux register data after reset: %08X\n", register_data);
+			//printf("IOMux register data after reset: %08X\n", register_data);
 			//_write_mem(_rk3288_gpio_grf_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].grf_bank_offset), register_data);
+		}
+	}
+	
+	for(uint8_t i = 0; i < 40; i++) {
+		if(_gpio_header_pins[i].is_gpio) {
+			uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset));
+			printf("GPIO output register of pin %d contains: %08X\n", i, register_data);
+			_clear_bit(&register_data, _gpio_header_pins[i].gpio_control_offset);
+			printf("GPIO output register data after reset: %08X\n", register_data);
+			//_write_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset), register_data);
+			
+			printf("GPIO mode register of pin %d contains: %08X\n", i, register_data);
+			register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset) + 0x01);
+			_clear_bit(&register_data, _gpio_header_pins[i].gpio_control_offset);
+			printf("GPIO mode register data after reset: %08X\n", register_data);
+			//_write_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset) + 0x01, register_data);
 		}
 	}
 }
@@ -197,6 +211,7 @@ printf("%d", VALID_GPIO(3));
 printf("%d", VALID_GPIO(41));
 printf("%d", VALID_GPIO(GPIO_NUMBER_TO_INDEX(41)));
 printf("%d", ALIGN_TO_UINT32T(16));*/
+
 	if(tinkerboard_init() == 1){
 		printf("Successfully initialized\n");
 
@@ -212,6 +227,8 @@ printf("%d", ALIGN_TO_UINT32T(16));*/
 		_write_mem(_rk3288_gpio_0_base, (uint32_t) 0);
 		_write_mem(_rk3288_gpio_5_base, (uint32_t) 0);
 	}
+	
+	reset_header();
 
 	tinkerboard_end();
 }

@@ -32,6 +32,8 @@
 #define RK3288_GPIO8A_GRF_OFFSET  0x0080
 #define RK3288_GPIO8B_GRF_OFFSET  0x0084
 
+#define RK3288_GRF_WRITEMASK_OFFSET 16
+
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 

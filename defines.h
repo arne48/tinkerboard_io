@@ -39,12 +39,12 @@ enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 
 struct gpio_pin_t {
   uint32_t gpio_bank_offset;
-  uint8_t gpio_control_offset;
+  uint32_t gpio_control_offset;
   uint32_t grf_bank_offset;
-  uint8_t grf_pin_offset;
-  uint8_t grf_config_size;
+  uint32_t grf_pin_offset;
+  uint32_t grf_config_size;
   enum IOMode mode;
-  uint8_t is_gpio;
+  uint32_t is_gpio;
 };
 
 struct spi_config_t {

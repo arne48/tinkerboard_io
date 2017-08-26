@@ -75,7 +75,7 @@ struct gpio_pin_t _gpio_header_pins[] = {
 	{.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset = 1, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset = 2, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
 	{.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 7, .grf_bank_offset = RK3288_GPIO7A_GRF_OFFSET, .grf_pin_offset = 14, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
 	{.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 8, .grf_bank_offset = RK3288_GPIO7B_GRF_OFFSET, .grf_pin_offset = 0, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-	{.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset = 3, .grf_bank_offset = RK3288_GPIO_BLOCK_SIZE, .grf_pin_offset = 6, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
+	{.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset = 3, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset = 6, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
 	{.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
 	{.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset = 4, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset = 8, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT}
 };
@@ -96,11 +96,11 @@ uint32_t _read_mem(volatile uint32_t* mem_addr) {
 	return ret;
 }
 
-void _set_bit(uint32_t* value, uint8_t bit) {
+void _set_bit(uint32_t* value, uint32_t bit) {
 	*value |= 1 << bit;
 }
 
-void _clear_bit(uint32_t* value, uint8_t bit) {
+void _clear_bit(uint32_t* value, uint32_t bit) {
 	*value &= ~(1 << bit);
 }
 
@@ -110,11 +110,11 @@ void _sleep_cyle(int cycles) {
 	}
 }
 
-void tinkerboard_set_gpio_mode(uint8_t pin_number, enum IOMode mode) {
+void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode) {
 	if(VALID_GPIO(pin_number) && _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].is_gpio) {
 		uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_bank_offset));
 		
-		for(uint8_t j = 0; j < _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_config_size; j++) {
+		for(uint32_t j = 0; j < _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_config_size; j++) {
 			_clear_bit(&register_data, _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_pin_offset + j);
 			_set_bit(&register_data, _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_pin_offset + j + RK3288_GRF_WRITEMASK_OFFSET);
 		}
@@ -136,7 +136,7 @@ void tinkerboard_set_gpio_mode(uint8_t pin_number, enum IOMode mode) {
 	}
 }
 
-void tinkerboard_set_gpio_state(uint8_t pin_number, enum IOState state) {
+void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state) {
 	if(VALID_GPIO(pin_number) && _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].is_gpio && _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].mode == OUTPUT) {
 		uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].gpio_bank_offset));
 		if(state == LOW) {
@@ -148,7 +148,7 @@ void tinkerboard_set_gpio_state(uint8_t pin_number, enum IOState state) {
 	}
 }
 
-enum IOState tinkerboard_get_gpio_state(uint8_t pin_number) {
+enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
 	if(VALID_GPIO(pin_number) && _gpio_header_pins[pin_number-1].is_gpio && _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].mode == INPUT) {
 
 	}
@@ -156,32 +156,13 @@ enum IOState tinkerboard_get_gpio_state(uint8_t pin_number) {
 }
 
 void reset_header(void) {
-	for(uint8_t i = 0; i < 40; i++) {
+	for(uint32_t i = 0; i < 40; i++) {
 		if(_gpio_header_pins[i].is_gpio) {
-			uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].grf_bank_offset));
-			//printf("IOMux register of pin %d contains: %08X\n", i, register_data);
-			for(uint8_t j = 0; j < _gpio_header_pins[i].grf_config_size; j++) {
-				_clear_bit(&register_data, _gpio_header_pins[i].grf_pin_offset + j);
-				_set_bit(&register_data, _gpio_header_pins[i].grf_pin_offset + j + RK3288_GRF_WRITEMASK_OFFSET);
-			}
-			//printf("IOMux register data after reset: %08X\n", register_data);
-			//_write_mem(_rk3288_gpio_grf_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].grf_bank_offset), register_data);
 		}
 	}
 	
-	for(uint8_t i = 0; i < 40; i++) {
+	for(uint32_t i = 0; i < 40; i++) {
 		if(_gpio_header_pins[i].is_gpio) {
-			uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset));
-			printf("GPIO output register of pin %d contains: %08X\n", i, register_data);
-			_clear_bit(&register_data, _gpio_header_pins[i].gpio_control_offset);
-			printf("GPIO output register data after reset: %08X\n", register_data);
-			//_write_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset), register_data);
-			
-			printf("GPIO mode register of pin %d contains: %08X\n", i, register_data);
-			register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset) + 0x01);
-			_clear_bit(&register_data, _gpio_header_pins[i].gpio_control_offset);
-			printf("GPIO mode register data after reset: %08X\n", register_data);
-			//_write_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[i].gpio_bank_offset) + 0x01, register_data);
 		}
 	}
 }
@@ -241,12 +222,18 @@ int main(int argc, const char * argv[]){
 
 	if(tinkerboard_init() == 1){
 		printf("Successfully initialized\n");
-		tinkerboard_set_gpio_mode(23, OUTPUT);
-		printf("GPIO init\n");
+		for(uint32_t idx = 1; idx<=40; idx++){
+			tinkerboard_set_gpio_mode(idx, OUTPUT);
+		}
 		
-		for(int i=0; i<10; i++){
-			tinkerboard_set_gpio_state(23, HIGH);
-			tinkerboard_set_gpio_state(23, LOW);
+		while(1){
+			for(uint32_t idx = 1; idx<=40; idx++){
+				tinkerboard_set_gpio_state(idx, HIGH);
+			}
+
+			for(uint32_t idx = 1; idx<=40; idx++){
+				tinkerboard_set_gpio_state(idx, LOW);
+			}
 		}
 		
 		

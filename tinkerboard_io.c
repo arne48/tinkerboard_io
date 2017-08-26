@@ -11,7 +11,9 @@
 
 #include "defines.h"
 
-uint32_t *_rk3288_gpio_grf_base = (uint32_t *)RK3288_GPIO_GRF_BASE;
+uint32_t *_rk3288_gpio_block_base = (uint32_t *)RK3288_GPIO_BLOCK_BASE;
+uint32_t *_rk3288_gpio_grf_base = (uint32_t *)MAP_FAILED;
+uint32_t *_rk3288_gpio_0_base = (uint32_t *)MAP_FAILED;
 uint32_t *_rk3288_gpio_5_base = (uint32_t *)MAP_FAILED;
 uint32_t *_rk3288_gpio_6_base = (uint32_t *)MAP_FAILED;
 uint32_t *_rk3288_gpio_7_base = (uint32_t *)MAP_FAILED;
@@ -134,15 +136,17 @@ int tinkerboard_init(void){
 		goto end;
 	}
 
-	_rk3288_gpio_grf_base = mmap(NULL, _rk3288_gpio_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_GPIO_GRF_BASE);
-	if(_rk3288_gpio_grf_base == MAP_FAILED){
+	_rk3288_gpio_block_base = mmap(NULL, _rk3288_gpio_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_GPIO_BLOCK_BASE);
+	if(_rk3288_gpio_block_base == MAP_FAILED){
 		printf("Error while mapping gpio block into virtual memory");
 	}
 
-	_rk3288_gpio_5_base = _rk3288_gpio_grf_base + RK3288_GPIO5_OFFSET / 4;
-	_rk3288_gpio_6_base = _rk3288_gpio_grf_base + RK3288_GPIO6_OFFSET / 4;
-	_rk3288_gpio_7_base = _rk3288_gpio_grf_base + RK3288_GPIO7_OFFSET / 4;
-	_rk3288_gpio_8_base = _rk3288_gpio_grf_base + RK3288_GPIO8_OFFSET / 4;
+	_rk3288_gpio_grf_base = _rk3288_gpio_block_base + RK3288_GPIO_GRF_OFFSET / 4;
+	_rk3288_gpio_0_base = _rk3288_gpio_block_base + RK3288_GPIO0_OFFSET / 4;
+	_rk3288_gpio_5_base = _rk3288_gpio_block_base + RK3288_GPIO5_OFFSET / 4;
+	_rk3288_gpio_6_base = _rk3288_gpio_block_base + RK3288_GPIO6_OFFSET / 4;
+	_rk3288_gpio_7_base = _rk3288_gpio_block_base + RK3288_GPIO7_OFFSET / 4;
+	_rk3288_gpio_8_base = _rk3288_gpio_block_base + RK3288_GPIO8_OFFSET / 4;
 
 	retcode = 1;
 
@@ -155,12 +159,14 @@ end:
 
 void tinkerboard_end(void) {
 
-	if(_rk3288_gpio_grf_base == MAP_FAILED) {
+	if(_rk3288_gpio_block_base == MAP_FAILED) {
 		return;
 	}
 
-	munmap((void**)_rk3288_gpio_grf_base, _rk3288_gpio_block_size);
+	munmap((void**)_rk3288_gpio_block_base, _rk3288_gpio_block_size);
+	_rk3288_gpio_block_base = MAP_FAILED;
 	_rk3288_gpio_grf_base = MAP_FAILED;
+	_rk3288_gpio_0_base = MAP_FAILED;
 	_rk3288_gpio_5_base = MAP_FAILED;
 	_rk3288_gpio_6_base = MAP_FAILED;
 	_rk3288_gpio_7_base = MAP_FAILED;

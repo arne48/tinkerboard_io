@@ -8,6 +8,10 @@
 #define RK3288_GPIO_BLOCK_BASE    0xFF750000
 #define RK3288_GPIO_BLOCK_SIZE    0xB0000
 
+#define RK3288_SPI_BLOCK_SIZE     0x30000
+#define RK3288_I2C_BLOCK_SIZE     0x40000
+#define RK3288_PWM_BLOCK_SIZE     0x10000
+
 #define RK3288_GPIO_GRF_OFFSET	  0x20000
 #define RK3288_GPIO0_OFFSET       0x00000
 #define RK3288_GPIO5_OFFSET       0x70000
@@ -26,16 +30,17 @@
 #define RK3288_GPIO7CH_GRF_OFFSET 0x0078
 
 #define RK3288_GPIO8A_GRF_OFFSET  0x0080
-#define RK3288_GPIOBB_GRF_OFFSET  0x0084
+#define RK3288_GPIO8B_GRF_OFFSET  0x0084
 
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 
 struct gpio_pin_t {
-  uint8_t gpio_bank_offset;
+  uint32_t gpio_bank_offset;
   uint8_t gpio_control_offset;
   uint32_t grf_bank_offset;
-  uint32_t grf_pin_offset;
+  uint8_t grf_pin_offset;
+  uint8_t grf_config_size;
   enum IOMode mode;
   uint8_t is_gpio;
 };

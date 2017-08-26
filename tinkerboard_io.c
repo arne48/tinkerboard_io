@@ -157,7 +157,7 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
 
 void tinkerboard_reset_header(void) {
 	for(uint32_t i = 1; i <= 40; i++) {
-		if(_gpio_header_pins[i].is_gpio) {
+		if(_gpio_header_pins[GPIO_NUMBER_TO_INDEX(i)].is_gpio) {
 			tinkerboard_set_gpio_mode(i, INPUT);
 		}
 	}

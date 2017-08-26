@@ -119,12 +119,12 @@ enum IOState tinkerboard_get_gpio_state(uint8_t pin_number) {
 	if(VALID_GPIO(pin_number) && _gpio_pins[pin_number-1].is_gpio && _gpio_pins[GPIO_NUMBER_TO_INDEX(pin_number)].mode == INPUT) {
 
 	}
+	return INPUT;
 }
 
 int tinkerboard_init(void){
 	int memfd;
 	int retcode;
-	FILE *fd;
 
 	memfd = -1;
 	retcode = 0;
@@ -134,7 +134,7 @@ int tinkerboard_init(void){
 		goto end;
 	}
 
-	_rk3288_gpio_grf_base = mmap(NULL, _rk3288_gpio_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, (uint32_t)_rk3288_gpio_grf_base);
+	_rk3288_gpio_grf_base = mmap(NULL, _rk3288_gpio_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_GPIO_GRF_BASE);
 	if(_rk3288_gpio_grf_base == MAP_FAILED){
 		printf("Error while mapping gpio block into virtual memory");
 	}
@@ -159,8 +159,6 @@ void tinkerboard_end(void) {
 		return;
 	}
 
-	//TESTME
-	//munmap(*(void**)&_rk3288_gpio_grf_base, _rk3288_gpio_block_size);
 	munmap((void**)_rk3288_gpio_grf_base, _rk3288_gpio_block_size);
 	_rk3288_gpio_grf_base = MAP_FAILED;
 	_rk3288_gpio_5_base = MAP_FAILED;
@@ -177,7 +175,7 @@ printf("%d", VALID_GPIO(3));
 printf("%d", VALID_GPIO(41));
 printf("%d", VALID_GPIO(GPIO_NUMBER_TO_INDEX(41)));
 printf("%d", ALIGN_TO_UINT32T(16));*/
-/*	if(tinkerboard_init() == 1){
+	if(tinkerboard_init() == 1){
 		printf("Successfully initialized\n");
 
 		_write_mem_b(_rk3288_gpio_grf_base + 0x0054 / 4, (uint32_t) 0x02000000);
@@ -190,5 +188,5 @@ printf("%d", ALIGN_TO_UINT32T(16));*/
 		_write_mem_b(_rk3288_gpio_5_base, (uint32_t) 0);
 	}
 
-	tinkerboard_end();*/
+	tinkerboard_end();
 }

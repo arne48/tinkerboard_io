@@ -63,7 +63,7 @@ struct gpio_pin_t _gpio_header_pins[] = {
 
 struct spi_pin_config_t _spi_configs[] = {
 	{.clk = 10, .txd = 12, .rxd = 14, .cs0 = 28, .cs1 = 30, .spi_block_offset = RK3288_SPI0_BLOCK_OFFSET},
-  {.clk = 22, .txd = 18, .rxd = 20, .cs0 = 23, .cs1 = 25, .spi_block_offset = RK3288_SPI2_BLOCK_OFFSET},
+	{.clk = 22, .txd = 18, .rxd = 20, .cs0 = 23, .cs1 = 25, .spi_block_offset = RK3288_SPI2_BLOCK_OFFSET},
 };
 
 /*
@@ -140,8 +140,7 @@ void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode) {
   if (VALID_GPIO(pin_number) && _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].is_gpio) {
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_bank_offset));
 
-    _set_pin_function(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_bank_offset),
-                        _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_pin_offset, 0,
+    _set_pin_function(&register_data, _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_pin_offset, 0,
                         _gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_config_size);
 
     _write_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[GPIO_NUMBER_TO_INDEX(pin_number)].grf_bank_offset), register_data);

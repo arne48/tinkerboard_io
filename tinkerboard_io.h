@@ -1,5 +1,5 @@
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef TINKERBOARD_IO_H
+#define TINKERBOARD_IO_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,10 +19,6 @@
 
 #define RK3288_GPIO_BLOCK_BASE    0xFF750000
 #define RK3288_GPIO_BLOCK_SIZE    0xB0000
-
-#define RK3288_SPI_BLOCK_SIZE     0x30000
-#define RK3288_I2C_BLOCK_SIZE     0x40000
-#define RK3288_PWM_BLOCK_SIZE     0x10000
 
 #define RK3288_GPIO_GRF_OFFSET	  0x20000
 #define RK3288_GPIO0_OFFSET       0x00000
@@ -44,10 +40,20 @@
 #define RK3288_GPIO8A_GRF_OFFSET  0x20080
 #define RK3288_GPIO8B_GRF_OFFSET  0x20084
 
+#define RK3288_SPI_BLOCK_BASE     0xFF110000
+#define RK3288_SPI0_BLOCK_OFFSET  0x00000
+#define RK3288_SPI1_BLOCK_OFFSET  0x10000
+#define RK3288_SPI2_BLOCK_OFFSET  0x20000
+#define RK3288_SPI_BLOCK_SIZE     0x30000
+
+#define RK3288_I2C_BLOCK_SIZE     0x40000
+#define RK3288_PWM_BLOCK_SIZE     0x10000
+
 #define RK3288_GRF_WRITEMASK_OFFSET 16
 
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
+enum SPIController {SPI0 = 0x0, SPI2 = 0x1};
 
 struct gpio_pin_t {
   uint32_t gpio_bank_offset;
@@ -59,12 +65,13 @@ struct gpio_pin_t {
   uint32_t is_gpio;
 };
 
-struct spi_config_t {
-  struct gpio_pin_t clk;
-  struct gpio_pin_t txd;
-  struct gpio_pin_t rxd;
-  struct gpio_pin_t cs0;
-  struct gpio_pin_t cs1;
+struct spi_pin_config_t {
+  uint32_t clk;
+  uint32_t txd;
+  uint32_t rxd;
+  uint32_t cs0;
+  uint32_t cs1;
+  uint32_t spi_block_offset;
 };
 
 struct i2c_config_t {

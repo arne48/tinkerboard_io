@@ -4,9 +4,12 @@ int main(int argc, const char * argv[]){
 
 	if(tinkerboard_init() == 1){
 		printf("Successfully initialized\n");
+		
+		
+		/*
 		for(uint32_t idx = 1; idx<=40; idx++){
 			tinkerboard_set_gpio_mode(idx, OUTPUT);
-		}
+		}*/
 		
 		/*
 		uint8_t tx_buff[] = {0xBE, 0XEF};
@@ -24,7 +27,7 @@ int main(int argc, const char * argv[]){
 		tinkerboard_spi_end(SPI0);*/
 		
 		
-		
+		/*
 		while(1){
 			for(uint32_t idx = 1; idx<=40; idx++){
 				tinkerboard_set_gpio_state(idx, HIGH);
@@ -33,9 +36,8 @@ int main(int argc, const char * argv[]){
 			for(uint32_t idx = 1; idx<=40; idx++){
 				tinkerboard_set_gpio_state(idx, LOW);
 			}
-		}
+		}*/
 
+		tinkerboard_end();
 	}
-
-	tinkerboard_end();
 }

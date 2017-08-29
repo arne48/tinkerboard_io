@@ -15,7 +15,7 @@
 #include "tinkerboard_spi.h"
 
 
-#define ALIGN_TO_UINT32T(x)  (x / 4)
+#define ALIGN_TO_UINT32T(x)  ((x) / 4)
 #define TO_INDEX(x)  (x-1)
 #define VALID_GPIO(x)  ((x)>0 && (x)<=40 ? 1 : 0)
 
@@ -48,7 +48,11 @@
 #define RK3288_SPI2_BLOCK_OFFSET  0x20000
 #define RK3288_SPI_BLOCK_SIZE     0x30000
 
-#define RK3288_I2C_BLOCK_SIZE     0x40000
+
+#define RK3288_I2C1_BLOCK_BASE    0xFF140000
+#define RK3288_I2C4_BLOCK_BASE    0xFF160000
+#define RK3288_I2C_BLOCK_SIZE     0x10000
+
 #define RK3288_PWM_BLOCK_SIZE     0x10000
 
 #define RK3288_GRF_WRITEMASK_OFFSET 16

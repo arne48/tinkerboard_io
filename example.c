@@ -11,7 +11,7 @@ int main(int argc, const char * argv[]){
 			tinkerboard_set_gpio_mode(idx, OUTPUT);
 		}*/
 		
-		/*
+		
 		uint8_t tx_buff[] = {0xBE, 0XEF};
 		struct spi_mode_config_t mode = {
 			.clk_mode = 1,
@@ -22,9 +22,9 @@ int main(int argc, const char * argv[]){
 			.byte_order = MSB_FIRST,
 		};
 		
-		tinkerboard_spi_init(SPI0, mode);
-		tinkerboard_spi_transfer(SPI0, tx_buff, 2, mode);
-		tinkerboard_spi_end(SPI0);*/
+		tinkerboard_spi_init(SPI2, mode);
+		tinkerboard_spi_transfer(SPI2, tx_buff, 2, mode);
+		tinkerboard_spi_end(SPI2);
 		
 		
 		/*

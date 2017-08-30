@@ -98,7 +98,7 @@
 #define TXBUSY                 (1 << 1)
 
 #define MAX_SCLK_OUT           50000000
-#define SPI_WAIT_FOR_IDLE_MICROS 5000
+#define SPI_WAIT_FOR_IDLE_MICROS 50000
 
 struct spi_internals_t {
   uint32_t fifo_len;

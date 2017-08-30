@@ -1,5 +1,8 @@
 #include "tinkerboard_io.h"
 
+uint32_t *_rk3288_cru_block_base = (uint32_t *) RK3288_CRU_BLOCK_BASE;
+uint32_t _rk3288_cru_block_size = RK3288_CRU_BLOCK_SIZE;
+
 uint32_t *_rk3288_gpio_block_base = (uint32_t *) RK3288_GPIO_BLOCK_BASE;
 uint32_t _rk3288_gpio_block_size = RK3288_GPIO_BLOCK_SIZE;
 
@@ -62,8 +65,17 @@ struct gpio_pin_t _gpio_header_pins[] = {
 };
 
 struct spi_pin_config_t _spi_configs[] = {
-	{.clk = 10, .txd = 12, .rxd = 14, .cs0 = 28, .cs1 = 30, .spi_block_offset = RK3288_SPI0_BLOCK_OFFSET, .initialized = 0},
-	{.clk = 22, .txd = 18, .rxd = 20, .cs0 = 23, .cs1 = 25, .spi_block_offset = RK3288_SPI2_BLOCK_OFFSET, .initialized = 0},
+	{.clk = 10, .txd = 12, .rxd = 14, .cs0 = 28, .cs1 = 30, .spi_block_offset = RK3288_SPI0_BLOCK_OFFSET, .initialized = 0,
+		.pll_sel_offset = RK3288_CRU_CLKSEL25_OFFSET,
+		.clk_src_offset = RK3288_CRU_CLKGATE2_OFFSET, .clk_gate_flag = 9, 
+		.pclk_src_offset = RK3288_CRU_CLKGATE6_OFFSET, .pclk_gate_flag = 4,
+		.softrst_offset = RK3288_CRU_SOFTRST_OFFSET, .softrst_flag = 3},
+		
+	{.clk = 22, .txd = 18, .rxd = 20, .cs0 = 23, .cs1 = 25, .spi_block_offset = RK3288_SPI2_BLOCK_OFFSET, .initialized = 0, 
+		.pll_sel_offset = RK3288_CRU_CLKSEL39_OFFSET,
+		.clk_src_offset = RK3288_CRU_CLKGATE2_OFFSET, .clk_gate_flag = 11, 
+		.pclk_src_offset = RK3288_CRU_CLKGATE6_OFFSET, .pclk_gate_flag = 6,
+		.softrst_offset = RK3288_CRU_SOFTRST_OFFSET, .softrst_flag = 5},
 };
 
 struct spi_internals_t _spi_internals[] = {
@@ -217,7 +229,14 @@ int tinkerboard_init(void) {
     printf("Couldn't open /dev/mem: %s\n", strerror(errno));
     goto end;
   }
-
+  
+  _rk3288_cru_block_base = mmap(NULL, _rk3288_cru_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_CRU_BLOCK_BASE);
+  if (_rk3288_cru_block_base == MAP_FAILED) {
+    printf("Error while mapping cru block into virtual memory\n");
+    goto end;
+  } else {
+	printf("Mapped CRU block to: %p\n", _rk3288_cru_block_base);
+  }
 
   _rk3288_gpio_block_base = mmap(NULL, _rk3288_gpio_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_GPIO_BLOCK_BASE);
   if (_rk3288_gpio_block_base == MAP_FAILED) {
@@ -226,10 +245,9 @@ int tinkerboard_init(void) {
   } else {
 	printf("Mapped GPIO block to: %p\n", _rk3288_gpio_block_base);
   }
-  
-  printf("GRF on offset 0x64(MMC) is %08X at %p\n", _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(0x20064)), _rk3288_gpio_block_base + ALIGN_TO_UINT32T(0x20064));
+  //printf("GRF on offset 0x64(MMC) is %08X at %p\n", _read_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(0x20064)), _rk3288_gpio_block_base + ALIGN_TO_UINT32T(0x20064));
 
-  /*
+
   _rk3288_spi_block_base = mmap(NULL, _rk3288_spi_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_SPI_BLOCK_BASE);
   if (_rk3288_spi_block_base == MAP_FAILED) {
     printf("Error while mapping spi block into virtual memory\n");
@@ -238,11 +256,17 @@ int tinkerboard_init(void) {
 	printf("Mapped SPI block to: %p\n", _rk3288_spi_block_base);
   }
  
-  _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET + ROCKCHIP_SPI_ENR), 0x1);
-  printf("SPI0 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(ROCKCHIP_SPI_ENR)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(ROCKCHIP_SPI_ENR));
-  printf("SPI1 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI1_BLOCK_OFFSET + ROCKCHIP_SPI_ENR)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI1_BLOCK_OFFSET + ROCKCHIP_SPI_ENR));
-  printf("SPI2 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET + ROCKCHIP_SPI_ENR)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET + ROCKCHIP_SPI_ENR));
- */
+  /*
+  printf("SPI2 PLL %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].pll_sel_offset)));
+  printf("SPI2 CLK %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].clk_src_offset)));
+  printf("SPI2 PLCK %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].pclk_src_offset)));
+  printf("SPI2 SOFTRST %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].softrst_offset)));
+  
+  _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET), 0x1);
+  printf("SPI0 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base), _rk3288_spi_block_base);
+  printf("SPI1 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI1_BLOCK_OFFSET)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI1_BLOCK_OFFSET));
+  printf("SPI2 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET));
+  */
   
   /*
   _rk3288_i2c1_block_base = mmap(NULL, _rk3288_i2c_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_I2C1_BLOCK_BASE);
@@ -321,7 +345,7 @@ static inline void _spi_set_clk_divider(enum SPIController controller, uint32_t 
 
 static inline void _spi_set_ctrlr0(enum SPIController controller, uint32_t config) {
   _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0), config);
-  printf("SPI Ctrl0 %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0)), (unsigned) _rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0));
+  printf("SPI Ctrl0 %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0));
 }
 
 static inline void _spi_wait_for_idle(enum SPIController controller) {
@@ -410,6 +434,22 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
     _write_mem(_rk3288_gpio_block_base + ALIGN_TO_UINT32T(_gpio_header_pins[pin].grf_bank_offset), register_data);
     _gpio_header_pins[pin].mode = SPI;
   }
+  
+  register_data = _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].pll_sel_offset));
+  _set_pin_function(&register_data, 0, 4, 8);
+  _write_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].pll_sel_offset), register_data);
+  
+  register_data = _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].clk_src_offset));
+  _set_pin_function(&register_data, _spi_configs[controller].clk_gate_flag, 0, 1);
+  _write_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].clk_src_offset), register_data);
+  
+  register_data = _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].pclk_src_offset));
+  _set_pin_function(&register_data, _spi_configs[controller].pclk_gate_flag, 0, 1);
+  _write_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].pclk_src_offset), register_data);
+  
+  register_data = _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].softrst_offset));
+  _set_pin_function(&register_data, _spi_configs[controller].softrst_flag, 0, 1);
+  _write_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].softrst_offset), register_data);
 
   uint32_t config = 0;
   config |= mode_config.data_frame_size << CR0_DFS_OFFSET;
@@ -421,8 +461,6 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
   _spi_set_fifo_size(controller , 2);
   _spi_set_slave_select(controller, mode_config.slave_select);
   _spi_set_clk_divider(controller, mode_config.clk_divider);
-  
-  
   
   _spi_enable_controller(controller, 1);
 

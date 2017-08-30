@@ -57,6 +57,15 @@
 
 #define RK3288_GRF_WRITEMASK_OFFSET 16
 
+#define RK3288_CRU_BLOCK_BASE	  0xFF760000
+#define RK3288_CRU_BLOCK_SIZE	  0x10000
+
+#define RK3288_CRU_SOFTRST_OFFSET 0x01CC
+#define RK3288_CRU_CLKSEL39_OFFSET 0x00FC
+#define RK3288_CRU_CLKSEL25_OFFSET 0x00C4
+#define RK3288_CRU_CLKGATE2_OFFSET 0x0168
+#define RK3288_CRU_CLKGATE6_OFFSET 0x0178
+
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 enum SPIController {SPI0 = 0x0, SPI2 = 0x1};
@@ -84,6 +93,13 @@ struct spi_pin_config_t {
   uint32_t cs0;
   uint32_t cs1;
   uint32_t spi_block_offset;
+  uint32_t pll_sel_offset;
+  uint32_t clk_src_offset;
+  uint32_t clk_gate_flag;
+  uint32_t pclk_src_offset;
+  uint32_t pclk_gate_flag;
+  uint32_t softrst_offset;
+  uint32_t softrst_flag;
   uint32_t initialized;
 };
 

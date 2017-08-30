@@ -16,7 +16,7 @@
 
 
 #define ALIGN_TO_UINT32T(x)  ((x) / 4)
-#define TO_INDEX(x)  (x-1)
+#define TO_INDEX(x)  ((x)-1)
 #define VALID_GPIO(x)  ((x)>0 && (x)<=40 ? 1 : 0)
 
 #define RK3288_GPIO_BLOCK_BASE    0xFF750000
@@ -55,7 +55,7 @@
 
 #define RK3288_PWM_BLOCK_SIZE     0x10000
 
-#define RK3288_GRF_WRITEMASK_OFFSET 16
+#define RK3288_CONFIG_WRITEMASK_OFFSET 16
 
 #define RK3288_CRU_BLOCK_BASE	  0xFF760000
 #define RK3288_CRU_BLOCK_SIZE	  0x10000

@@ -254,18 +254,6 @@ int tinkerboard_init(void) {
   } else {
 	printf("Mapped SPI block to: %p\n", _rk3288_spi_block_base);
   }
- 
-  /*
-  printf("SPI2 PLL %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].pll_sel_offset)));
-  printf("SPI2 CLK %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].clk_src_offset)));
-  printf("SPI2 PLCK %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].pclk_src_offset)));
-  printf("SPI2 SOFTRST %08X\n", _read_mem(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[SPI2].softrst_offset)));
-  
-  _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET), 0x1);
-  printf("SPI0 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base), _rk3288_spi_block_base);
-  printf("SPI1 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI1_BLOCK_OFFSET)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI1_BLOCK_OFFSET));
-  printf("SPI2 ENR %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET)), _rk3288_spi_block_base + ALIGN_TO_UINT32T(RK3288_SPI2_BLOCK_OFFSET));
-  */
   
   /*
   _rk3288_i2c1_block_base = mmap(NULL, _rk3288_i2c_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_I2C1_BLOCK_BASE);
@@ -342,10 +330,9 @@ static inline void _spi_set_fifo_size(enum SPIController controller, uint32_t fi
 
 static inline void _spi_set_clk_divider(enum SPIController controller, uint32_t divider) {
   if(divider >= 2 && divider <= 65534) {
-    _clear_bit(&divider, 0);
-    _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset) + ROCKCHIP_SPI_BAUDR, divider);
+    _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_BAUDR), divider);
   } else {
-	_write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset) + ROCKCHIP_SPI_BAUDR, 2);
+	_write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_BAUDR), 2);
   }
 }
 
@@ -438,7 +425,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
     _gpio_header_pins[pin].mode = SPI;
   }
 
-  _set_config(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].pll_sel_offset), 0, 4, 8);
+  _set_config(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].pll_sel_offset), 0, 0x88, 8);
 
   _set_config(_rk3288_cru_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].clk_src_offset),
               _spi_configs[controller].clk_gate_flag, 0, 1);
@@ -461,7 +448,30 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
   _spi_set_slave_select(controller, mode_config.slave_select);
   _spi_set_clk_divider(controller, mode_config.clk_divider);
   _spi_enable_controller(controller, 1);
-
+  
+  
+  uint32_t status = _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset));
+  printf("SPI CONFIG %08X \n", status);
+  
+  status = _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
+  printf("SPI STATUS %08X \n", status);
+  
+  _write_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_TXDR), 0xEF);  
+  _sleep_cyle(10000);
+  uint32_t rxbuff = _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_RXDR));
+  _sleep_cyle(10000);
+  
+  uint32_t max = 0;
+  do {
+	  status = _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
+	  max++;
+  }while(max < 1000000 && (status & 1));	  
+  
+      
+  status = _read_mem(_rk3288_spi_block_base + ALIGN_TO_UINT32T(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
+  printf("SPI STATUS %08X \n", status);
+  
+    
   _spi_internals[controller].fifo_len = _spi_get_fifo_len(controller);
   _spi_configs[controller].initialized = 1;
 }

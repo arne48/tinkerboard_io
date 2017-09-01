@@ -274,7 +274,7 @@ void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state) {
 
 enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
   if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && _gpio_header_pins[TO_INDEX(pin_number)].mode == INPUT) {
-    uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset));
+    uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset + 0x50));
     uint32_t state = (register_data >> _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset) & 0x1;
 
     if(state == 1) {

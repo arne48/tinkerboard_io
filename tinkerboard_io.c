@@ -12,9 +12,11 @@ uint32_t _rk3288_spi_block_size = RK3288_SPI_BLOCK_SIZE;
 uint32_t *_rk3288_pwm_base = (uint32_t *) MAP_FAILED;
 uint32_t _rk3288_pmw_block_size = RK3288_PWM_BLOCK_SIZE;
 
+/*
 uint32_t *_rk3288_i2c1_block_base = (uint32_t *) RK3288_I2C1_BLOCK_BASE;
 uint32_t *_rk3288_i2c4_block_base = (uint32_t *) RK3288_I2C4_BLOCK_BASE;
 uint32_t _rk3288_i2c_block_size = RK3288_I2C_BLOCK_SIZE;
+*/
 
 struct gpio_pin_t _gpio_header_pins[] = {
     {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
@@ -315,12 +317,12 @@ void tinkerboard_end(void) {
 
 static inline void _spi_enable_controller(enum SPIController controller, uint32_t config) {
   _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_ENR), config);
-  printf("SPI Enable %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_ENR)), _rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_ENR));
+//  printf("SPI Enable %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_ENR)), _rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_ENR));
 }
 
 static inline void _spi_set_slave_select(enum SPIController controller, enum SPISlaveSelect select) {
   _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SER), select);
-  printf("SPI SS %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SER)), _rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SER));
+//  printf("SPI SS %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SER)), _rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SER));
 }
 
 static inline void _spi_set_fifo_size(enum SPIController controller, uint32_t fifo_size) {
@@ -338,7 +340,7 @@ static inline void _spi_set_clk_divider(enum SPIController controller, uint32_t 
 
 static inline void _spi_set_ctrlr0(enum SPIController controller, uint32_t config) {
   _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0), config);
-  printf("SPI Ctrl0 %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0)), _rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0));
+//  printf("SPI Ctrl0 %08X at %p\n", _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0)), _rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_CTRLR0));
 }
 
 static inline void _spi_wait_for_idle(enum SPIController controller) {
@@ -347,26 +349,12 @@ static inline void _spi_wait_for_idle(enum SPIController controller) {
   clock_gettime(CLOCK_MONOTONIC_RAW, &start);
   do {
     uint32_t status = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
-    //printf("SPI STATUS %08X \n", status);
     if(!(_read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR)) & SR_BUSY)) {
       return;
     }
     clock_gettime(CLOCK_MONOTONIC_RAW, &now);
   } while(_timediff_micro(start, now) < SPI_WAIT_FOR_IDLE_MICROS);
   printf("SPI timed out\n");
-}
-
-static inline uint32_t _spi_get_fifo_len(enum SPIController controller) {
-  uint32_t fifo;
-  for (fifo = 2; fifo < 32; fifo++) {
-    _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_TXFTLR), fifo);
-    if (fifo != _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_TXFTLR))) {
-      break;
-    }
-  }
-
-  _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_TXFTLR), 0);
-  return (fifo == 31) ? 0 : fifo;
 }
 
 static inline void _spi_send(enum SPIController controller, struct spi_mode_config_t mode_config){
@@ -392,7 +380,6 @@ static inline void _spi_send(enum SPIController controller, struct spi_mode_conf
 }
 
 static inline void _spi__receive(enum SPIController controller, struct spi_mode_config_t mode_config) {
-
   uint32_t rx_left = (_spi_internals[controller].rx_end - _spi_internals[controller].rx) / mode_config.data_frame_size;
   uint32_t rx_room = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_RXFLR));
 
@@ -401,13 +388,14 @@ static inline void _spi__receive(enum SPIController controller, struct spi_mode_
 
   while (max--) {
     rxw = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_RXDR));
-    if (mode_config.data_frame_size == 1) {
+    if (mode_config.data_frame_size == DFS_8) {
       *(uint8_t *) (_spi_internals[controller].rx) = (uint8_t) rxw;
     }
     else {
       *(uint16_t *) (_spi_internals[controller].rx) = (uint16_t) rxw;
     }
-    _spi_internals[controller].rx+= mode_config.data_frame_size;
+    
+    _spi_internals[controller].rx += mode_config.data_frame_size;
   }
 }
 
@@ -433,6 +421,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset),
                 _gpio_header_pins[pin].grf_pin_offset, 1, _gpio_header_pins[pin].grf_config_size);
     _gpio_header_pins[pin].mode = SPI;
+    printf("SS0 register: %08X\n", _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset)));
   }
 
   if(mode_config.slave_select == SS1) {
@@ -440,9 +429,10 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset),
                 _gpio_header_pins[pin].grf_pin_offset, 1, _gpio_header_pins[pin].grf_config_size);
     _gpio_header_pins[pin].mode = SPI;
+    printf("SS1 register: %08X\n", _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset)));
   }
 
-  _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].pll_sel_offset), 0, 0x88, 8);
+  _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].pll_sel_offset), 0, 0x02, 8);
 
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].clk_src_offset),
               _spi_configs[controller].clk_gate_flag, 0, 1);
@@ -466,27 +456,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
   _spi_set_clk_divider(controller, mode_config.clk_divider);
   _spi_enable_controller(controller, 1);
 
-  /*
-  uint32_t status = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset));
-  printf("SPI CONFIG %08X \n", status);
-  
-  status = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
-  printf("SPI STATUS %08X \n", status);
-  
-  _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_TXDR), 0xEF);
-  
-  uint32_t max = 0;
-  do {
-	  status = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
-	  max++;
-  }while(max < 1000000 && (status & 1));	  
-  
-      
-  status = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
-  printf("SPI STATUS %08X \n", status);*/
-
-
-  _spi_internals[controller].fifo_len = 31; //_spi_get_fifo_len(controller);
+  _spi_internals[controller].fifo_len = 31;
   _spi_configs[controller].initialized = 1;
 }
 
@@ -495,6 +465,7 @@ void tinkerboard_spi_end(enum SPIController controller){
 }
 
 void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config) {
+  _spi_enable_controller(controller, 1);
   uint32_t remain = 0;
   _spi_internals[controller].tx = tx_buff;
   _spi_internals[controller].tx_end = tx_buff + length;
@@ -515,7 +486,8 @@ void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, u
 
   } while (remain);
 
-  if(_spi_internals[controller].tx) {
+  if(_spi_internals[controller].tx || _spi_internals[controller].rx) {
     _spi_wait_for_idle(controller);
   }
+  _spi_enable_controller(controller, 0);
 }

@@ -370,8 +370,6 @@ static inline uint32_t _spi_get_fifo_len(enum SPIController controller) {
 }
 
 static inline void _spi_send(enum SPIController controller, struct spi_mode_config_t mode_config){
-  if(_spi_configs[controller].initialized){
-	//printf("Sending Chunk\n");
     uint32_t tx_left, tx_room;
 
     tx_left = (_spi_internals[controller].tx_end - _spi_internals[controller].tx) / mode_config.data_frame_size;
@@ -391,6 +389,25 @@ static inline void _spi_send(enum SPIController controller, struct spi_mode_conf
       _write_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_TXDR), txw);
       _spi_internals[controller].tx += mode_config.data_frame_size;
     }
+}
+
+static inline void _spi__receive(enum SPIController controller, struct spi_mode_config_t mode_config) {
+
+  uint32_t rx_left = (_spi_internals[controller].rx_end - _spi_internals[controller].rx) / mode_config.data_frame_size;
+  uint32_t rx_room = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_RXFLR));
+
+  uint32_t max = _min(rx_left, rx_room);
+  uint32_t rxw;
+
+  while (max--) {
+    rxw = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_RXDR));
+    if (mode_config.data_frame_size == 1) {
+      *(uint8_t *) (_spi_internals[controller].rx) = (uint8_t) rxw;
+    }
+    else {
+      *(uint16_t *) (_spi_internals[controller].rx) = (uint16_t) rxw;
+    }
+    _spi_internals[controller].rx+= mode_config.data_frame_size;
   }
 }
 
@@ -444,7 +461,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
   config |= mode_config.transfer_mode << CR0_XFM_OFFSET;
 
   _spi_set_ctrlr0(controller, config);
-  _spi_set_fifo_size(controller , 2);
+  _spi_set_fifo_size(controller , 31);
   _spi_set_slave_select(controller, mode_config.slave_select);
   _spi_set_clk_divider(controller, mode_config.clk_divider);
   _spi_enable_controller(controller, 1);
@@ -469,7 +486,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
   printf("SPI STATUS %08X \n", status);*/
 
 
-  _spi_internals[controller].fifo_len = _spi_get_fifo_len(controller);
+  _spi_internals[controller].fifo_len = 31; //_spi_get_fifo_len(controller);
   _spi_configs[controller].initialized = 1;
 }
 
@@ -477,17 +494,25 @@ void tinkerboard_spi_end(enum SPIController controller){
   _spi_enable_controller(controller, 0);
 }
 
-void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint32_t tx_length, struct spi_mode_config_t mode_config) {
+void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config) {
   uint32_t remain = 0;
   _spi_internals[controller].tx = tx_buff;
-  _spi_internals[controller].tx_end = tx_buff + tx_length;
+  _spi_internals[controller].tx_end = tx_buff + length;
+
+  _spi_internals[controller].rx = rx_buff;
+  _spi_internals[controller].rx_end = rx_buff + length;
 
   do {
     if(_spi_internals[controller].tx) {
       remain = _spi_internals[controller].tx_end - _spi_internals[controller].tx;
-      //printf("Remaining %d\n", remain);
       _spi_send(controller, mode_config);
     }
+
+    if(_spi_internals[controller].rx) {
+      remain = _spi_internals[controller].rx_end - _spi_internals[controller].rx;
+      _spi__receive(controller, mode_config);
+    }
+
   } while (remain);
 
   if(_spi_internals[controller].tx) {

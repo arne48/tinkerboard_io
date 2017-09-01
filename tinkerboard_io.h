@@ -139,7 +139,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
 
 void tinkerboard_spi_end(enum SPIController controller);
 
-void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint32_t tx_length, struct spi_mode_config_t mode_config);
+void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config);
 
 
 #endif

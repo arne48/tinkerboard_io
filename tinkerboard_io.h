@@ -15,7 +15,7 @@
 #include "tinkerboard_spi.h"
 
 
-#define ALIGN_TO_UINT32T(x)  ((x) / 4)
+#define ALIGN(x)  ((x) / 4)
 #define TO_INDEX(x)  ((x)-1)
 #define VALID_GPIO(x)  ((x)>0 && (x)<=40 ? 1 : 0)
 

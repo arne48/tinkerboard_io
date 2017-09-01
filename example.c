@@ -34,7 +34,7 @@ int main(int argc, const char * argv[]){
     };
 
     tinkerboard_spi_init(SPI2, mode);
-    //tinkerboard_spi_transfer(SPI2, tx_buff, 2, mode);
+	tinkerboard_spi_transfer(SPI2, tx_buff, 2, mode);
     tinkerboard_spi_end(SPI2);
 
     tinkerboard_end(); 

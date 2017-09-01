@@ -31,16 +31,31 @@
 
 #define RK3288_GPIO5B_GRF_OFFSET  0x20050
 #define RK3288_GPIO5C_GRF_OFFSET  0x20054
-
 #define RK3288_GPIO6A_GRF_OFFSET  0x2005C
-
 #define RK3288_GPIO7A_GRF_OFFSET  0x2006C
 #define RK3288_GPIO7B_GRF_OFFSET  0x20070
 #define RK3288_GPIO7CL_GRF_OFFSET 0x20074
 #define RK3288_GPIO7CH_GRF_OFFSET 0x20078
-
 #define RK3288_GPIO8A_GRF_OFFSET  0x20080
 #define RK3288_GPIO8B_GRF_OFFSET  0x20084
+
+#define RK3288_GPIO5B_GRF_P_OFFSET 0x20184
+#define RK3288_GPIO5C_GRF_P_OFFSET 0x20188
+#define RK3288_GPIO6A_GRF_P_OFFSET 0x20190
+#define RK3288_GPIO7A_GRF_P_OFFSET 0x201A0
+#define RK3288_GPIO7B_GRF_P_OFFSET 0x201A4
+#define RK3288_GPIO7C_GRF_P_OFFSET 0x201A8
+#define RK3288_GPIO8A_GRF_P_OFFSET 0x201B0
+#define RK3288_GPIO8B_GRF_P_OFFSET 0x201B4
+
+#define RK3288_GPIO5B_GRF_E_OFFSET 0x20204
+#define RK3288_GPIO5C_GRF_E_OFFSET 0x20208
+#define RK3288_GPIO6A_GRF_E_OFFSET 0x20210
+#define RK3288_GPIO7A_GRF_E_OFFSET 0x20220
+#define RK3288_GPIO7B_GRF_E_OFFSET 0x20224
+#define RK3288_GPIO7C_GRF_E_OFFSET 0x20228
+#define RK3288_GPIO8A_GRF_E_OFFSET 0x20230
+#define RK3288_GPIO8B_GRF_E_OFFSET 0x20234
 
 #define RK3288_SPI_BLOCK_BASE     0xFF110000
 #define RK3288_SPI0_BLOCK_OFFSET  0x00000
@@ -53,6 +68,7 @@
 #define RK3288_I2C4_BLOCK_BASE    0xFF160000
 #define RK3288_I2C_BLOCK_SIZE     0x10000
 
+#define RK3288_PWM_BLOCK_BASE     0xFF680000
 #define RK3288_PWM_BLOCK_SIZE     0x10000
 
 #define RK3288_CONFIG_WRITEMASK_OFFSET 16
@@ -74,6 +90,8 @@ enum SPIDataFrameSize {DFS_4 = 0x0, DFS_8 = 0x1, DFS_16 = 0x2};
 enum SPIByteTransform {BT_16_8 = 0x0, BT_8_8 = 0x1};
 enum SPITransferMode {TRANSMIT_RECEIVE = 0x0, TRANSMIT = 0x1, RECEIVE = 0x2};
 enum SPIByteOrder {MSB_FIRST = 0x0, LSB_FIRST = 0x1};
+enum PUDMode {DEFAULT = 0x0, PULLUP = 0x1, PULLDOWN = 0x2, BUSKEEPER = 0x3};
+enum DriveStrength {DRV2MA = 0x0, DRV4MA = 0x1, DRV8MA = 0x2, DRV12MA = 0x3};
 
 
 struct gpio_pin_t {
@@ -82,6 +100,9 @@ struct gpio_pin_t {
   uint32_t grf_bank_offset;
   uint32_t grf_pin_offset;
   uint32_t grf_config_size;
+  uint32_t grf_pud_offset;
+  uint32_t grf_drvstrg_offset;
+  uint32_t grf_pd_pin_offset;
   enum IOMode mode;
   uint32_t is_gpio;
 };
@@ -128,6 +149,10 @@ void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode);
 void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state);
 
 enum IOState tinkerboard_get_gpio_state(uint32_t pin_number);
+
+void tinkerboard_set_gpio_pud(uint32_t pin_number, enum PUDMode mode);
+
+void tinkerboard_set_gpio_drive_strength(uint32_t pin_number, enum DriveStrength strength);
 
 void tinkerboard_reset_header(void);
 

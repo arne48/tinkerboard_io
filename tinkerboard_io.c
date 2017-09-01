@@ -9,60 +9,116 @@ uint32_t _rk3288_gpio_block_size = RK3288_GPIO_BLOCK_SIZE;
 uint32_t *_rk3288_spi_block_base = (uint32_t *) RK3288_SPI_BLOCK_BASE;
 uint32_t _rk3288_spi_block_size = RK3288_SPI_BLOCK_SIZE;
 
-uint32_t *_rk3288_pwm_base = (uint32_t *) MAP_FAILED;
+/*
+uint32_t *_rk3288_pwm_base = (uint32_t *) RK3288_PWM_BLOCK_BASE;
 uint32_t _rk3288_pmw_block_size = RK3288_PWM_BLOCK_SIZE;
 
-/*
+
 uint32_t *_rk3288_i2c1_block_base = (uint32_t *) RK3288_I2C1_BLOCK_BASE;
 uint32_t *_rk3288_i2c4_block_base = (uint32_t *) RK3288_I2C4_BLOCK_BASE;
 uint32_t _rk3288_i2c_block_size = RK3288_I2C_BLOCK_SIZE;
 */
 
 struct gpio_pin_t _gpio_header_pins[] = {
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  4, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset =  8, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  5, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset = 10, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO0_OFFSET, .gpio_control_offset = 17, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset =  9, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  2, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //1
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //2
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  4, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset =  8, //3
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8A_GRF_E_OFFSET, .grf_pd_pin_offset = 4,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //4
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  5, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset = 10, //5
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8A_GRF_E_OFFSET, .grf_pd_pin_offset = 5,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //6
+    {.gpio_bank_offset = RK3288_GPIO0_OFFSET, .gpio_control_offset = 17, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, //7
+        .grf_pud_offset = 0, .grf_drvstrg_offset = 0, .grf_pd_pin_offset = 0, .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset =  9, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  2, //8
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 1,
+        .is_gpio = 1, .mode = INPUT},
 
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset =  8, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  0, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 12, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  8, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  0, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  0, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 14, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset = 12, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 15, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset = 14, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 10, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  4, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //9
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset =  8, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  0, //10
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 0,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 12, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  8, //11
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 4,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  0, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  0, //12
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO6A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO6A_GRF_E_OFFSET, .grf_pd_pin_offset = 0,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 14, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset = 12, //13
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 6,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //14
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 15, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset = 14, //15
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 7,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 10, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  4, //16
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 2,
+        .is_gpio = 1, .mode = INPUT},
 
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 11, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  6, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  9, .grf_bank_offset = RK3288_GPIO8B_GRF_OFFSET, .grf_pin_offset =  2, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  8, .grf_bank_offset = RK3288_GPIO8B_GRF_OFFSET, .grf_pin_offset =  0, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 19, .grf_bank_offset = RK3288_GPIO5C_GRF_OFFSET, .grf_pin_offset =  6, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  6, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset = 12, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  7, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset = 14, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //17
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 11, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  6, //18
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 3,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  9, .grf_bank_offset = RK3288_GPIO8B_GRF_OFFSET, .grf_pin_offset =  2, //19
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8B_GRF_E_OFFSET, .grf_pd_pin_offset = 1,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //20
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  8, .grf_bank_offset = RK3288_GPIO8B_GRF_OFFSET, .grf_pin_offset =  0, //21
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8B_GRF_E_OFFSET, .grf_pd_pin_offset = 0,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 19, .grf_bank_offset = RK3288_GPIO5C_GRF_OFFSET, .grf_pin_offset =  6, //22
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO5C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5C_GRF_E_OFFSET, .grf_pd_pin_offset = 3,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  6, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset = 12, //23
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8A_GRF_E_OFFSET, .grf_pd_pin_offset = 6,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  7, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset = 14, //24
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8A_GRF_E_OFFSET, .grf_pd_pin_offset = 7,
+        .is_gpio = 1, .mode = INPUT},
 
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  3, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset =  6, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 17, .grf_bank_offset = RK3288_GPIO7CL_GRF_OFFSET, .grf_pin_offset = 4, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 18, .grf_bank_offset = RK3288_GPIO7CL_GRF_OFFSET, .grf_pin_offset = 8, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 13, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset = 10, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 16, .grf_bank_offset = RK3288_GPIO5C_GRF_OFFSET, .grf_pin_offset =  0, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 23, .grf_bank_offset = RK3288_GPIO7CH_GRF_OFFSET, .grf_pin_offset = 12, .grf_config_size = 3, .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //25
+    {.gpio_bank_offset = RK3288_GPIO8_OFFSET, .gpio_control_offset =  3, .grf_bank_offset = RK3288_GPIO8A_GRF_OFFSET, .grf_pin_offset =  6, //26
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8A_GRF_E_OFFSET, .grf_pd_pin_offset = 3,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 17, .grf_bank_offset = RK3288_GPIO7CL_GRF_OFFSET, .grf_pin_offset = 4, //27
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO7C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO7C_GRF_E_OFFSET, .grf_pd_pin_offset = 1,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 18, .grf_bank_offset = RK3288_GPIO7CL_GRF_OFFSET, .grf_pin_offset = 8, //28
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO7C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO7C_GRF_E_OFFSET, .grf_pd_pin_offset = 2,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 13, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset = 10, //29
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 5,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //30
+    {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset = 16, .grf_bank_offset = RK3288_GPIO5C_GRF_OFFSET, .grf_pin_offset =  0, //31
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5C_GRF_E_OFFSET, .grf_pd_pin_offset = 0,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 23, .grf_bank_offset = RK3288_GPIO7CH_GRF_OFFSET, .grf_pin_offset = 12, //32
+        .grf_config_size = 3, .grf_pud_offset = RK3288_GPIO7C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO7C_GRF_E_OFFSET, .grf_pd_pin_offset = 7,
+        .is_gpio = 1, .mode = INPUT},
 
-    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 22, .grf_bank_offset = RK3288_GPIO7CH_GRF_OFFSET, .grf_pin_offset = 8, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  1, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  2, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset =  7, .grf_bank_offset = RK3288_GPIO7A_GRF_OFFSET, .grf_pin_offset = 14, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset =  8, .grf_bank_offset = RK3288_GPIO7B_GRF_OFFSET, .grf_pin_offset =  0, .grf_config_size = 2, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  3, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  6, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT},
-    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT},
-    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  4, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  8, .grf_config_size = 1, .is_gpio = 1, .mode = INPUT}
+    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset = 22, .grf_bank_offset = RK3288_GPIO7CH_GRF_OFFSET, .grf_pin_offset = 8, //33
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO7C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO7C_GRF_E_OFFSET, .grf_pd_pin_offset = 6,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0,.mode = INPUT}, //34
+    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  1, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  2, //35
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO6A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO6A_GRF_E_OFFSET, .grf_pd_pin_offset = 1,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset =  7, .grf_bank_offset = RK3288_GPIO7A_GRF_OFFSET, .grf_pin_offset = 14, //36
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO7A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO7A_GRF_E_OFFSET, .grf_pd_pin_offset = 7,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO7_OFFSET, .gpio_control_offset =  8, .grf_bank_offset = RK3288_GPIO7B_GRF_OFFSET, .grf_pin_offset =  0, //37
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO7B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO7B_GRF_E_OFFSET, .grf_pd_pin_offset = 0,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  3, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  6, //38
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO6A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO6A_GRF_E_OFFSET, .grf_pd_pin_offset = 3,
+        .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //39
+    {.gpio_bank_offset = RK3288_GPIO6_OFFSET, .gpio_control_offset =  4, .grf_bank_offset = RK3288_GPIO6A_GRF_OFFSET, .grf_pin_offset =  8, //40
+        .grf_config_size = 1, .grf_pud_offset = RK3288_GPIO6A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO6A_GRF_E_OFFSET, .grf_pd_pin_offset = 4,
+        .is_gpio = 1, .mode = INPUT}
 };
 
 struct spi_pin_config_t _spi_configs[] = {
@@ -165,6 +221,20 @@ uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number) {
   return 0;
 }
 
+void tinkerboard_set_gpio_pud(uint32_t pin_number, enum PUDMode mode) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number != 7) {
+    _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_pud_offset),
+                _gpio_header_pins[TO_INDEX(pin_number)].grf_pd_pin_offset, mode, 1);
+  }
+}
+
+void tinkerboard_set_gpio_drive_strength(uint32_t pin_number, enum DriveStrength strength) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number != 7) {
+    _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_drvstrg_offset),
+                _gpio_header_pins[TO_INDEX(pin_number)].grf_pd_pin_offset, strength, 1);
+  }
+}
+
 void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode) {
   if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio) {
 
@@ -188,8 +258,7 @@ void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode) {
 }
 
 void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state) {
-  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio &&
-      _gpio_header_pins[TO_INDEX(pin_number)].mode == OUTPUT) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && _gpio_header_pins[TO_INDEX(pin_number)].mode == OUTPUT) {
 
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset));
 
@@ -204,8 +273,15 @@ void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state) {
 }
 
 enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
-  if (VALID_GPIO(pin_number) && _gpio_header_pins[pin_number - 1].is_gpio && _gpio_header_pins[TO_INDEX(pin_number)].mode == INPUT) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && _gpio_header_pins[TO_INDEX(pin_number)].mode == INPUT) {
+    uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset));
+    uint32_t state = (register_data >> _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset) & 0x1;
 
+    if(state == 1) {
+      return HIGH;
+    } else {
+      return LOW;
+    }
   }
   return LOW;
 }
@@ -421,7 +497,6 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset),
                 _gpio_header_pins[pin].grf_pin_offset, 1, _gpio_header_pins[pin].grf_config_size);
     _gpio_header_pins[pin].mode = SPI;
-    printf("SS0 register: %08X\n", _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset)));
   }
 
   if(mode_config.slave_select == SS1) {
@@ -429,7 +504,6 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset),
                 _gpio_header_pins[pin].grf_pin_offset, 1, _gpio_header_pins[pin].grf_config_size);
     _gpio_header_pins[pin].mode = SPI;
-    printf("SS1 register: %08X\n", _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset)));
   }
 
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].pll_sel_offset), 0, 0x02, 8);

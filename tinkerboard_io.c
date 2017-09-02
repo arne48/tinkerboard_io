@@ -182,9 +182,9 @@ static inline void _sleep_cyle(int cycles) {
   }
 }
 
-static inline uint32_t _generate_bitmask(uint32_t n, uint32_t size) {
+static inline uint32_t _generate_bitmask(uint32_t start, uint32_t size) {
   uint32_t ret = 0;
-  for (uint32_t i = n; i <= n + size - 1; i++) {
+  for (uint32_t i = start; i <= start + size - 1; i++) {
     ret |= 1 << i;
   }
   return ret;
@@ -277,12 +277,13 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset + 0x50));
     uint32_t state = (register_data >> _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset) & 0x1;
 
-    if(state == 1) {
+    if(state) {
       return HIGH;
     } else {
       return LOW;
     }
   }
+
   return LOW;
 }
 

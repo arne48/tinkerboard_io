@@ -82,6 +82,10 @@
 #define RK3288_CRU_CLKGATE2_OFFSET 0x0168
 #define RK3288_CRU_CLKGATE6_OFFSET 0x0178
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 enum SPIController {SPI0 = 0x0, SPI2 = 0x1};
@@ -165,6 +169,8 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
 void tinkerboard_spi_end(enum SPIController controller);
 
 void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config);
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

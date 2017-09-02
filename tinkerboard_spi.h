@@ -100,6 +100,10 @@
 #define MAX_SCLK_OUT           50000000
 #define SPI_WAIT_FOR_IDLE_MICROS 50000
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 struct spi_internals_t {
   uint32_t fifo_len;
   uint8_t* rx;
@@ -108,5 +112,8 @@ struct spi_internals_t {
   uint8_t* tx_end;
 };
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

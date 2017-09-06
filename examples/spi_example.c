@@ -17,6 +17,13 @@ int main(int argc, const char *argv[]) {
 
     uint8_t rx_buff[64] = {};
 
+    /*
+     * The slave select of the spi is not bound to
+     * specific pins. Any pin as long as it is a valid
+     * gpio and not part of the spi controller can be used.
+     * If no slave select is needed the define "NO_SS" will
+     * set non.
+     */
     struct spi_mode_config_t mode = {
         .clk_mode = 1,
         .clk_divider = 8,
@@ -26,17 +33,17 @@ int main(int argc, const char *argv[]) {
         .byte_order = MSB_FIRST,
     };
 
-    uint64_t error = 0;
+    unsigned long error = 0;
     tinkerboard_spi_init(SPI2, mode);
     tinkerboard_set_gpio_mode(26, OUTPUT);
     tinkerboard_set_gpio_state(26, HIGH);
 
 
-    for (int j = 0; j < 1000; j++) {
+    for (unsigned int j = 0; j < 1000; j++) {
       tinkerboard_set_gpio_state(26, LOW);
       tinkerboard_spi_transfer(SPI2, tx_buff, rx_buff, 64, mode);
       tinkerboard_set_gpio_state(26, HIGH);
-      for (int i = 0; i < 64; i++) {
+      for (unsigned int i = 0; i < 64; i++) {
         if (rx_buff[i] != tx_buff[i]) {
           printf("%02X is not %02X\n", rx_buff[i], tx_buff[i]);
           error++;
@@ -45,7 +52,7 @@ int main(int argc, const char *argv[]) {
     }
 
     if (error) {
-      printf("Transfer failed with %llu errors\n", error);
+      printf("Transfer failed with %lu errors\n", error);
     } else {
       printf("Transfer successful\n");
     }

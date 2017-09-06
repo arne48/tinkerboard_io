@@ -176,12 +176,6 @@ static inline void _clear_bit(uint32_t *value, uint32_t bit) {
   *value &= ~(1 << bit);
 }
 
-static inline void _sleep_cyle(int cycles) {
-  for (int j = 0; j < cycles; j++) {
-    asm volatile("nop");
-  }
-}
-
 static inline uint32_t _generate_bitmask(uint32_t start, uint32_t size) {
   uint32_t ret = 0;
   for (uint32_t i = start; i <= start + size - 1; i++) {
@@ -238,13 +232,16 @@ void tinkerboard_set_gpio_drive_strength(uint32_t pin_number, enum DriveStrength
 void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode) {
   if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio) {
 
+    // Set IOMUX of requested pin to gpio
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_bank_offset),
                 _gpio_header_pins[TO_INDEX(pin_number)].grf_pin_offset, 0, _gpio_header_pins[TO_INDEX(pin_number)].grf_config_size);
 
 
+    // Set value of gpio in "data out" register to LOW. If gpio becomes an output it will be LOW initially
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset),
                 _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset, 0, 1);
 
+    // Set gpio to either INPUT or OUTPUT
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset) + 0x01);
     if (mode == INPUT) {
       _clear_bit(&register_data, _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset);
@@ -274,6 +271,8 @@ void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state) {
 
 enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
   if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && _gpio_header_pins[TO_INDEX(pin_number)].mode == INPUT) {
+
+    // Read input register and get bit of the requested pin
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset + 0x50));
     uint32_t state = (register_data >> _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset) & 0x1;
 
@@ -315,7 +314,7 @@ int tinkerboard_init(void) {
     printf("Error while mapping cru block into virtual memory\n");
     goto end;
   } else {
-	printf("Mapped CRU block to: %p\n", _rk3288_cru_block_base);
+	//printf("Mapped CRU block to: %p\n", _rk3288_cru_block_base);
   }
 
   _rk3288_gpio_block_base = mmap(NULL, _rk3288_gpio_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_GPIO_BLOCK_BASE);
@@ -323,7 +322,7 @@ int tinkerboard_init(void) {
     printf("Error while mapping gpio block into virtual memory\n");
     goto end;
   } else {
-	printf("Mapped GPIO block to: %p\n", _rk3288_gpio_block_base);
+	//printf("Mapped GPIO block to: %p\n", _rk3288_gpio_block_base);
   }
 
   _rk3288_spi_block_base = mmap(NULL, _rk3288_spi_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_SPI_BLOCK_BASE);
@@ -331,7 +330,7 @@ int tinkerboard_init(void) {
     printf("Error while mapping spi block into virtual memory\n");
     goto end;
   } else {
-	printf("Mapped SPI block to: %p\n", _rk3288_spi_block_base);
+	//printf("Mapped SPI block to: %p\n", _rk3288_spi_block_base);
   }
 
   /*
@@ -350,9 +349,7 @@ int tinkerboard_init(void) {
   } else {
 	printf("Mapped i2c4 block to: %p\n", _rk3288_i2c4_block_base);
   }
-  
-  printf("I2C1 CLKDIC %08X at %p\n", _read_mem(_rk3288_i2c1_block_base + 0x1), _rk3288_i2c1_block_base + 0x1);
-  printf("I2C4 CLKDIV %08X at %p\n", _read_mem(_rk3288_i2c4_block_base + 0x1), _rk3288_i2c4_block_base + 0x1);
+
   */
 
   retcode = 1;
@@ -429,7 +426,6 @@ static inline void _spi_wait_for_idle(enum SPIController controller) {
 
   clock_gettime(CLOCK_MONOTONIC_RAW, &start);
   do {
-    uint32_t status = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR));
     if(!(_read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_SR)) & SR_BUSY)) {
       return;
     }
@@ -460,7 +456,7 @@ static inline void _spi_send(enum SPIController controller, struct spi_mode_conf
     }
 }
 
-static inline void _spi__receive(enum SPIController controller, struct spi_mode_config_t mode_config) {
+static inline void _spi_receive(enum SPIController controller, struct spi_mode_config_t mode_config) {
   uint32_t rx_left = (_spi_internals[controller].rx_end - _spi_internals[controller].rx) / mode_config.data_frame_size;
   uint32_t rx_room = _read_mem(_rk3288_spi_block_base + ALIGN(_spi_configs[controller].spi_block_offset + ROCKCHIP_SPI_RXFLR));
 
@@ -482,6 +478,7 @@ static inline void _spi__receive(enum SPIController controller, struct spi_mode_
 
 void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_t mode_config) {
 
+  // Setting IOMUX for tx, rx and clock so that the spi controller is driving these pins
   uint32_t pin = _spi_configs[controller].clk;
   _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[pin].grf_bank_offset),
               _gpio_header_pins[pin].grf_pin_offset, 1, _gpio_header_pins[pin].grf_config_size);
@@ -497,20 +494,26 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
               _gpio_header_pins[pin].grf_pin_offset, 1, _gpio_header_pins[pin].grf_config_size);
   _gpio_header_pins[pin].mode = SPI;
 
-  if(mode_config.slave_select != 0) {
+  // If valid pin for slave select is provided set it as output to use it later as ss pin
+  if(mode_config.slave_select != 0 && mode_config.slave_select != _spi_configs[controller].txd &&
+      mode_config.slave_select != _spi_configs[controller].rxd && mode_config.slave_select != _spi_configs[controller].clk) {
     _spi_internals[controller].cs_pin = mode_config.slave_select;
     tinkerboard_set_gpio_mode(_spi_internals[controller].cs_pin, OUTPUT);
     tinkerboard_set_gpio_state(_spi_internals[controller].cs_pin, HIGH);
   }
 
+  // Select PLL clock source (codec clock) and set divider value
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].pll_sel_offset), 0, 0x02, 8);
 
+  // Activate clock source
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].clk_src_offset),
               _spi_configs[controller].clk_gate_flag, 0, 1);
 
+  // Activate peripheral clock source
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].pclk_src_offset),
               _spi_configs[controller].pclk_gate_flag, 0, 1);
 
+  // Disable softreset of spi controller
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].softrst_offset),
               _spi_configs[controller].softrst_flag, 0, 1);
 
@@ -537,14 +540,14 @@ void tinkerboard_spi_end(enum SPIController controller){
 
 void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config) {
   _spi_enable_controller(controller, 1);
-  uint32_t remain = 0;
+  unsigned long remain = 0;
   _spi_internals[controller].tx = tx_buff;
   _spi_internals[controller].tx_end = tx_buff + length;
 
   _spi_internals[controller].rx = rx_buff;
   _spi_internals[controller].rx_end = rx_buff + length;
 
-  if(_spi_internals[controller].cs_pin != 0) {
+  if(_spi_internals[controller].cs_pin != NO_SS) {
     tinkerboard_set_gpio_state(_spi_internals[controller].cs_pin, LOW);
   }
 
@@ -556,7 +559,7 @@ void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, u
 
     if(_spi_internals[controller].rx) {
       remain = _spi_internals[controller].rx_end - _spi_internals[controller].rx;
-      _spi__receive(controller, mode_config);
+      _spi_receive(controller, mode_config);
     }
 
   } while (remain);
@@ -567,7 +570,7 @@ void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, u
   }
 
 
-  if(_spi_internals[controller].cs_pin != 0) {
+  if(_spi_internals[controller].cs_pin != NO_SS) {
     tinkerboard_set_gpio_state(_spi_internals[controller].cs_pin, HIGH);
   }
 

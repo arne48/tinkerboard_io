@@ -368,6 +368,8 @@ int tinkerboard_init(void) {
 }
 
 void tinkerboard_end(void) {
+  tinkerboard_reset_header();
+
   if (_rk3288_gpio_block_base != MAP_FAILED) {
     munmap((void **) _rk3288_gpio_block_base, _rk3288_gpio_block_size);
     _rk3288_gpio_block_base = MAP_FAILED;

@@ -86,6 +86,8 @@
 extern "C"{
 #endif
 
+#define NO_SS 0x0
+
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 enum SPIController {SPI0 = 0x0, SPI2 = 0x1};

@@ -89,7 +89,7 @@ extern "C"{
 enum IOState {HIGH = 0x1, LOW = 0x0};
 enum IOMode {INPUT = 0x0, OUTPUT = 0x1, SPI = 0x2, I2C = 0x3, PWM = 0x4};
 enum SPIController {SPI0 = 0x0, SPI2 = 0x1};
-enum SPISlaveSelect {SS_NONE = 0x1, SS0 = 0x2, SS1 = 0x3};
+//enum SPISlaveSelect {SS_NONE = 0x1, SS0 = 0x2, SS1 = 0x3};
 enum SPIDataFrameSize {DFS_4 = 0x0, DFS_8 = 0x1, DFS_16 = 0x2};
 enum SPIByteTransform {BT_16_8 = 0x0, BT_8_8 = 0x1};
 enum SPITransferMode {TRANSMIT_RECEIVE = 0x0, TRANSMIT = 0x1, RECEIVE = 0x2};
@@ -132,7 +132,7 @@ struct spi_mode_config_t {
   uint32_t clk_divider;
   uint32_t clk_mode;
   enum SPIDataFrameSize data_frame_size;
-  enum SPISlaveSelect slave_select;
+  uint32_t slave_select;
   enum SPITransferMode transfer_mode;
   enum SPIByteOrder  byte_order;
 };

@@ -110,6 +110,7 @@ struct spi_internals_t {
   uint8_t* tx;
   uint8_t* rx_end;
   uint8_t* tx_end;
+  uint32_t cs_pin;
 };
 
 #ifdef __cplusplus

@@ -1,27 +1,9 @@
-#include "tinkerboard_io.h"
+#include "../tinkerboard_io.h"
 
 int main(int argc, const char *argv[]) {
 
   if (tinkerboard_init() == 1) {
     printf("Successfully initialized\n");
-
-
-    for (uint32_t idx = 1; idx <= 40; idx++) {
-      tinkerboard_set_gpio_mode(idx, OUTPUT);
-    }
-
-
-
-    /*while(1) {
-        for (uint32_t idx = 1; idx <= 40; idx++) {
-    tinkerboard_set_gpio_state(idx, HIGH);
-        }
-
-        for (uint32_t idx = 1; idx <= 40; idx++) {
-    tinkerboard_set_gpio_state(idx, LOW);
-        }
-      }*/
-
 
     uint8_t tx_buff[] = {0xBE, 0XEF, 0xBE, 0XEF, 0xBE, 0XEF, 0xBE, 0XEF,
                          0xBE, 0XEF, 0xBE, 0XEF, 0xBE, 0XEF, 0xBE, 0XEF,
@@ -35,13 +17,14 @@ int main(int argc, const char *argv[]) {
         .clk_mode = 1,
         .clk_divider = 8,
         .data_frame_size = DFS_8,
-        .slave_select = SS_NONE,
+        .slave_select = 0,
         .transfer_mode = TRANSMIT_RECEIVE,
         .byte_order = MSB_FIRST,
     };
 
     uint64_t error = 0;
     tinkerboard_spi_init(SPI2, mode);
+    tinkerboard_set_gpio_mode(26, OUTPUT);
     tinkerboard_set_gpio_state(26, HIGH);
 
 

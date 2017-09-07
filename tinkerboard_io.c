@@ -12,11 +12,6 @@ uint32_t _rk3288_spi_block_size = RK3288_SPI_BLOCK_SIZE;
 /*
 uint32_t *_rk3288_pwm_base = (uint32_t *) RK3288_PWM_BLOCK_BASE;
 uint32_t _rk3288_pmw_block_size = RK3288_PWM_BLOCK_SIZE;
-
-
-uint32_t *_rk3288_i2c1_block_base = (uint32_t *) RK3288_I2C1_BLOCK_BASE;
-uint32_t *_rk3288_i2c4_block_base = (uint32_t *) RK3288_I2C4_BLOCK_BASE;
-uint32_t _rk3288_i2c_block_size = RK3288_I2C_BLOCK_SIZE;
 */
 
 struct gpio_pin_t _gpio_header_pins[] = {
@@ -294,9 +289,7 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
 
 void tinkerboard_reset_header(void) {
   for (uint32_t i = 1; i <= 40; i++) {
-    if (_gpio_header_pins[TO_INDEX(i)].is_gpio) {
-      tinkerboard_set_gpio_mode(i, INPUT);
-    }
+    tinkerboard_set_gpio_mode(i, INPUT);
   }
 }
 
@@ -333,25 +326,6 @@ int tinkerboard_init(void) {
 	//printf("Mapped SPI block to: %p\n", _rk3288_spi_block_base);
   }
 
-  /*
-  _rk3288_i2c1_block_base = mmap(NULL, _rk3288_i2c_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_I2C1_BLOCK_BASE);
-  if (_rk3288_i2c1_block_base == MAP_FAILED) {
-    printf("Error while mapping i2c1 block into virtual memory\n");
-    goto end;
-  } else {
-	printf("Mapped i2c1 block to: %p\n", _rk3288_i2c1_block_base);
-  }
-  
-  _rk3288_i2c4_block_base = mmap(NULL, _rk3288_i2c_block_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, RK3288_I2C4_BLOCK_BASE);
-  if (_rk3288_i2c4_block_base == MAP_FAILED) {
-    printf("Error while mapping i2c4 block into virtual memory\n");
-    goto end;
-  } else {
-	printf("Mapped i2c4 block to: %p\n", _rk3288_i2c4_block_base);
-  }
-
-  */
-
   retcode = 1;
 
   end:
@@ -359,7 +333,9 @@ int tinkerboard_init(void) {
     close(memfd);
   }
 
-  tinkerboard_reset_header();
+  if (retcode == 1) {
+    tinkerboard_reset_header();
+  }
 
   return retcode;
 }
@@ -517,6 +493,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
   _set_config(_rk3288_cru_block_base + ALIGN(_spi_configs[controller].softrst_offset),
               _spi_configs[controller].softrst_flag, 0, 1);
 
+  // Assemble configuration register of spi controller
   uint32_t config = 0;
   config |= mode_config.data_frame_size << CR0_DFS_OFFSET;
   config |= mode_config.clk_mode << CR0_SCPH_OFFSET;
@@ -540,13 +517,14 @@ void tinkerboard_spi_end(enum SPIController controller){
 
 void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config) {
   _spi_enable_controller(controller, 1);
+
   unsigned long remain = 0;
   _spi_internals[controller].tx = tx_buff;
   _spi_internals[controller].tx_end = tx_buff + length;
-
   _spi_internals[controller].rx = rx_buff;
   _spi_internals[controller].rx_end = rx_buff + length;
 
+  // Check if slave select is used
   if(_spi_internals[controller].cs_pin != NO_SS) {
     tinkerboard_set_gpio_state(_spi_internals[controller].cs_pin, LOW);
   }
@@ -561,15 +539,14 @@ void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, u
       remain = _spi_internals[controller].rx_end - _spi_internals[controller].rx;
       _spi_receive(controller, mode_config);
     }
-
   } while (remain);
 
-
+  // If spi controller is still busy keep waiting and eventually timing out
   if(_spi_internals[controller].tx) {
     _spi_wait_for_idle(controller);
   }
 
-
+  // Check if slave select is used
   if(_spi_internals[controller].cs_pin != NO_SS) {
     tinkerboard_set_gpio_state(_spi_internals[controller].cs_pin, HIGH);
   }

@@ -4,8 +4,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -O0 -g")
 
 add_library(tinkerboard_io SHARED tinkerboard_io.c)
 
-add_executable(gpio_example examples/gpio_example.c)
-target_link_libraries(gpio_example tinkerboard_io)
+add_executable(gpio_out_example examples/gpio_out_example.c)
+target_link_libraries(gpio_out_example tinkerboard_io)
+
+add_executable(gpio_in_example examples/gpio_in_example.c)
+target_link_libraries(gpio_in_example tinkerboard_io)
 
 add_executable(spi_example examples/spi_example.c)
 target_link_libraries(spi_example tinkerboard_io)

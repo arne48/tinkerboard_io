@@ -59,14 +59,8 @@
 
 #define RK3288_SPI_BLOCK_BASE     0xFF110000
 #define RK3288_SPI0_BLOCK_OFFSET  0x00000
-#define RK3288_SPI1_BLOCK_OFFSET  0x10000
 #define RK3288_SPI2_BLOCK_OFFSET  0x20000
 #define RK3288_SPI_BLOCK_SIZE     0x30000
-
-
-#define RK3288_I2C1_BLOCK_BASE    0xFF140000
-#define RK3288_I2C4_BLOCK_BASE    0xFF160000
-#define RK3288_I2C_BLOCK_SIZE     0x10000
 
 #define RK3288_PWM_BLOCK_BASE     0xFF680000
 #define RK3288_PWM_BLOCK_SIZE     0x10000
@@ -171,6 +165,7 @@ void tinkerboard_spi_init(enum SPIController controller, struct spi_mode_config_
 void tinkerboard_spi_end(enum SPIController controller);
 
 void tinkerboard_spi_transfer(enum SPIController controller, uint8_t* tx_buff, uint8_t* rx_buff, uint32_t length, struct spi_mode_config_t mode_config);
+
 #ifdef __cplusplus
 }
 #endif

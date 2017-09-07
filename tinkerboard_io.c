@@ -201,7 +201,7 @@ static inline void _set_config(uint32_t *register_addr, uint32_t offset, uint32_
 */
 
 uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number) {
-  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number != 7) {
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_bank_offset));
     return (_generate_bitmask(_gpio_header_pins[TO_INDEX(pin_number)].grf_pin_offset,
                               _gpio_header_pins[TO_INDEX(pin_number)].grf_config_size) & register_data)
@@ -233,11 +233,12 @@ void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode) {
 
 
     // Set value of gpio in "data out" register to LOW. If gpio becomes an output it will be LOW initially
-    _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset),
-                _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset, 0, 1);
+    uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset));
+    _clear_bit(&register_data, _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset);
+    _write_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset), register_data);
 
     // Set gpio to either INPUT or OUTPUT
-    uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset) + 0x01);
+    register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset) + 0x01);
     if (mode == INPUT) {
       _clear_bit(&register_data, _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset);
       _gpio_header_pins[TO_INDEX(pin_number)].mode = INPUT;

@@ -18,8 +18,10 @@ int main(int argc, const char *argv[]) {
     }
 
     // Not really needed as the initialization is setting all gpios as input
+    // but not all gpios are using pulldowns initially
     for (uint32_t idx = 1; idx <= 40; idx++) {
       tinkerboard_set_gpio_mode(idx, INPUT);
+      tinkerboard_set_gpio_pud(idx, PULLDOWN);
     }
 
     enum IOState last_states[40] = {LOW};

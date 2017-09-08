@@ -18,6 +18,8 @@
 #define ALIGN(x)  ((x) / 4)
 #define TO_INDEX(x)  ((x)-1)
 #define VALID_GPIO(x)  ((x)>0 && (x)<=40 ? 1 : 0)
+#define NO_POWER_PIN(x) ((x) != 1 && (x) != 2 && (x) != 4 && (x) != 6 && (x) != 9 && (x) != 14 \
+                        && (x) != 20 && (x) != 25 && (x) != 30 && (x) != 34 && (x) != 39)
 
 #define RK3288_GPIO_BLOCK_BASE    0xFF750000
 #define RK3288_GPIO_BLOCK_SIZE    0xB0000
@@ -90,7 +92,7 @@ enum SPIDataFrameSize {DFS_4 = 0x0, DFS_8 = 0x1, DFS_16 = 0x2};
 enum SPIByteTransform {BT_16_8 = 0x0, BT_8_8 = 0x1};
 enum SPITransferMode {TRANSMIT_RECEIVE = 0x0, TRANSMIT = 0x1, RECEIVE = 0x2};
 enum SPIByteOrder {MSB_FIRST = 0x0, LSB_FIRST = 0x1};
-enum PUDMode {DEFAULT = 0x0, PULLUP = 0x1, PULLDOWN = 0x2, BUSKEEPER = 0x3};
+enum PUDMode {NORMAL_Z = 0x0, PULLUP = 0x1, PULLDOWN = 0x2, BUSKEEPER = 0x3};
 enum DriveStrength {DRV2MA = 0x0, DRV4MA = 0x1, DRV8MA = 0x2, DRV12MA = 0x3};
 
 

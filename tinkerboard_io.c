@@ -173,8 +173,8 @@ static inline void _clear_bit(uint32_t *value, uint32_t bit) {
 
 static inline uint32_t _generate_bitmask(uint32_t start, uint32_t size) {
   uint32_t ret = 0;
-  for (uint32_t i = start; i <= start + size - 1; i++) {
-    ret |= 1 << i;
+  for (uint32_t idx = start; idx <= start + size - 1; idx++) {
+    ret |= 1 << idx;
   }
   return ret;
 }
@@ -197,7 +197,7 @@ static inline void _set_config(uint32_t *register_addr, uint32_t offset, uint32_
 /*
 *
 * GPIO FUNCTIONS
-*
+* TODO add handling for pin 7 for drive strength and pullup/down
 */
 
 uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number) {
@@ -289,8 +289,9 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
 */
 
 void tinkerboard_reset_header(void) {
-  for (uint32_t i = 1; i <= 40; i++) {
-    tinkerboard_set_gpio_mode(i, INPUT);
+  for (uint32_t idx = 1; idx <= 40; idx++) {
+    tinkerboard_set_gpio_mode(idx, INPUT);
+    tinkerboard_set_gpio_pud(idx, NORMAL_Z);
   }
 }
 
@@ -342,9 +343,8 @@ int tinkerboard_init(void) {
 }
 
 void tinkerboard_end(void) {
-  tinkerboard_reset_header();
-
   if (_rk3288_gpio_block_base != MAP_FAILED) {
+    tinkerboard_reset_header();
     munmap((void **) _rk3288_gpio_block_base, _rk3288_gpio_block_size);
     _rk3288_gpio_block_base = MAP_FAILED;
   }

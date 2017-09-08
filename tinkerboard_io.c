@@ -9,11 +9,6 @@ uint32_t _rk3288_gpio_block_size = RK3288_GPIO_BLOCK_SIZE;
 uint32_t *_rk3288_spi_block_base = (uint32_t *) RK3288_SPI_BLOCK_BASE;
 uint32_t _rk3288_spi_block_size = RK3288_SPI_BLOCK_SIZE;
 
-/*
-uint32_t *_rk3288_pwm_base = (uint32_t *) RK3288_PWM_BLOCK_BASE;
-uint32_t _rk3288_pmw_block_size = RK3288_PWM_BLOCK_SIZE;
-*/
-
 struct gpio_pin_t _gpio_header_pins[] = {
     {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //1
     {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //2
@@ -25,8 +20,9 @@ struct gpio_pin_t _gpio_header_pins[] = {
         .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO8A_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO8A_GRF_E_OFFSET, .grf_pd_pin_offset = 10,
         .is_gpio = 1, .mode = INPUT},
     {.gpio_bank_offset = 0, .gpio_control_offset = 0, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, .is_gpio = 0, .mode = INPUT}, //6
-    {.gpio_bank_offset = RK3288_GPIO0_OFFSET, .gpio_control_offset = 17, .grf_bank_offset = 0, .grf_pin_offset = 0, .grf_config_size = 0, //7
-        .grf_pud_offset = 0, .grf_drvstrg_offset = 0, .grf_pd_pin_offset = 0, .is_gpio = 1, .mode = INPUT},
+    {.gpio_bank_offset = RK3288_GPIO0_OFFSET, .gpio_control_offset = 17, .grf_bank_offset = RK3288_GPIO0C_GRF_OFFSET, .grf_pin_offset = 2, //7
+        .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO0C_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO0C_GRF_E_OFFSET, .grf_pd_pin_offset = 2,
+        .is_gpio = 1, .mode = INPUT},
     {.gpio_bank_offset = RK3288_GPIO5_OFFSET, .gpio_control_offset =  9, .grf_bank_offset = RK3288_GPIO5B_GRF_OFFSET, .grf_pin_offset =  2, //8
         .grf_config_size = 2, .grf_pud_offset = RK3288_GPIO5B_GRF_P_OFFSET, .grf_drvstrg_offset = RK3288_GPIO5B_GRF_E_OFFSET, .grf_pd_pin_offset = 2,
         .is_gpio = 1, .mode = INPUT},
@@ -197,11 +193,10 @@ static inline void _set_config(uint32_t *register_addr, uint32_t offset, uint32_
 /*
 *
 * GPIO FUNCTIONS
-* TODO add handling for pin 7 for drive strength and pullup/down
 */
 
 uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number) {
-  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number != 7) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio) {
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_bank_offset));
     return (_generate_bitmask(_gpio_header_pins[TO_INDEX(pin_number)].grf_pin_offset,
                               _gpio_header_pins[TO_INDEX(pin_number)].grf_config_size) & register_data)
@@ -211,14 +206,14 @@ uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number) {
 }
 
 void tinkerboard_set_gpio_pud(uint32_t pin_number, enum PUDMode mode) {
-  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number != 7) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number) {
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_pud_offset),
                 _gpio_header_pins[TO_INDEX(pin_number)].grf_pd_pin_offset, mode, 2);
   }
 }
 
 void tinkerboard_set_gpio_drive_strength(uint32_t pin_number, enum DriveStrength strength) {
-  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number != 7) {
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio && pin_number) {
     _set_config(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_drvstrg_offset),
                 _gpio_header_pins[TO_INDEX(pin_number)].grf_pd_pin_offset, strength, 2);
   }

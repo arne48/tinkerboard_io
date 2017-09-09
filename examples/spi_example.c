@@ -5,14 +5,14 @@ int main(int argc, const char *argv[]) {
   if (tinkerboard_init() == 1) {
     printf("Successfully initialized\n");
 
-    uint8_t tx_buff[] = {0xBE, 0XEF, 0xBE, 0XEF, 0x00, 0XEF, 0xBE, 0XFF,
-                         0xBE, 0XEF, 0xBE, 0XEF, 0x00, 0XEF, 0xFF, 0XEF,
-                         0xBE, 0XEF, 0xBE, 0XEF, 0x00, 0XFF, 0xBE, 0XEF,
-                         0x11, 0X11, 0x11, 0X11, 0xFF, 0X11, 0x11, 0X11,
-                         0xBE, 0XEF, 0xBE, 0XFF, 0x00, 0XEF, 0xBE, 0XEF,
-                         0xBE, 0XEF, 0xFF, 0XEF, 0x00, 0XEF, 0xBE, 0XEF,
-                         0xBE, 0XFF, 0xBE, 0XEF, 0x00, 0XEF, 0xBE, 0XEF,
-                         0xFF, 0XEF, 0xBE, 0XEF, 0x00, 0XEF, 0xBE, 0XEF
+    uint8_t tx_buff[] = {0xBE, 0XEF, 0xBE, 0XEF, 0x00, 0XEF, 0xBE, 0xFE,
+                         0xBE, 0XEF, 0xBE, 0XEF, 0x00, 0XEF, 0xFE, 0XEF,
+                         0xBE, 0XEF, 0xBE, 0XEF, 0x00, 0xFE, 0xBE, 0XEF,
+                         0x11, 0X11, 0x11, 0X11, 0xFE, 0X11, 0x11, 0X11,
+                         0xBE, 0XEF, 0xBE, 0xFE, 0x00, 0XEF, 0xBE, 0XEF,
+                         0xBE, 0XEF, 0xFE, 0XEF, 0x00, 0XEF, 0xBE, 0XEF,
+                         0xBE, 0xFE, 0xBE, 0XEF, 0x00, 0XEF, 0xBE, 0XEF,
+                         0xFE, 0XEF, 0xBE, 0XEF, 0x00, 0XEF, 0xBE, 0XEF
     };
 
     uint8_t rx_buff[64] = {};
@@ -28,6 +28,7 @@ int main(int argc, const char *argv[]) {
         .clk_mode = 1,
         .clk_divider = 8,
         .data_frame_size = DFS_8,
+        //.slave_select = 26,
         .slave_select = NO_SS,
         .transfer_mode = TRANSMIT_RECEIVE,
         .byte_order = MSB_FIRST,

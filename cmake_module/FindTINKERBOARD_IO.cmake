@@ -1,0 +1,5 @@
+find_library(TINKERBOARD_IO_LIBRARIES NAMES tinkerboard_io)
+find_path(TINKERBOARD_IO_INCLUDE_DIRS NAMES tinkerboard_io.h)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(tinkerboard_io DEFAULT_MSG TINKERBOARD_IO_LIBRARIES TINKERBOARD_IO_INCLUDE_DIRS)

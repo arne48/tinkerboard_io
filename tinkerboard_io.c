@@ -195,7 +195,7 @@ static inline void _set_config(uint32_t *register_addr, uint32_t offset, uint32_
 * GPIO FUNCTIONS
 */
 
-uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number) {
+uint32_t tinkerboard_get_grf_config(uint32_t pin_number) {
   if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio) {
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].grf_bank_offset));
     return (_generate_bitmask(_gpio_header_pins[TO_INDEX(pin_number)].grf_pin_offset,
@@ -267,7 +267,7 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
     uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset + 0x50));
     uint32_t state = (register_data >> _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset) & 0x1;
 
-    if(state) {
+    if (state) {
       return HIGH;
     } else {
       return LOW;
@@ -275,6 +275,21 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
   }
 
   return LOW;
+}
+
+enum IOMode tinkerboard_get_gpio_mode(uint32_t pin_number){
+  if (VALID_GPIO(pin_number) && _gpio_header_pins[TO_INDEX(pin_number)].is_gpio) {
+    uint32_t register_data = _read_mem(_rk3288_gpio_block_base + ALIGN(_gpio_header_pins[TO_INDEX(pin_number)].gpio_bank_offset) + 0x01);
+    uint32_t  state = (register_data >> _gpio_header_pins[TO_INDEX(pin_number)].gpio_control_offset) & 0x1;
+
+    if (state) {
+      return OUTPUT;
+    } else {
+      return INPUT;
+    }
+  }
+
+  return INPUT;
 }
 
 /*
@@ -286,7 +301,7 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number) {
 void tinkerboard_reset_header(void) {
   for (uint32_t idx = 1; idx <= 40; idx++) {
     tinkerboard_set_gpio_mode(idx, INPUT);
-    tinkerboard_set_gpio_pud(idx, NORMAL_Z);
+    tinkerboard_set_gpio_pud(idx, PULLUP);
   }
 }
 

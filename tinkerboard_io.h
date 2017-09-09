@@ -134,9 +134,11 @@ struct spi_mode_config_t {
   enum SPIByteOrder  byte_order;
 };
 
-uint32_t tinkerboard_get_gpio_mode(uint32_t pin_number);
+uint32_t tinkerboard_get_grf_config(uint32_t pin_number);
 
 void tinkerboard_set_gpio_mode(uint32_t pin_number, enum IOMode mode);
+
+enum IOMode tinkerboard_get_gpio_mode(uint32_t pin_number);
 
 void tinkerboard_set_gpio_state(uint32_t pin_number, enum IOState state);
 

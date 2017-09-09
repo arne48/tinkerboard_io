@@ -1,12 +1,12 @@
 # Yet another IO library for the Asus Tinker Board
 
 ## Introduction
-Due to some shortcomings with the wiringTB library of Asus provides and my need for direct SPI access without the spidev subsystem I decided to write this minimalistic IO library for the Tinker Board. This is done by the consistent utilization of direct memory access _(via virtual memory mapping)_.
+Due to some shortcomings with the wiringTB library which Asus provides and my need for direct SPI access without the spidev subsystem I decided to write this minimalistic IO library for the Tinker Board. This is done by the consistent utilization of direct memory access _(via virtual memory mapping)_.
 The need for direct access was based on the requirements of my project.
-So I implemented the features I needed plus some nice to have ones for the completeness of feature groups. E.g. including reading from gpios even when I just use their output functionality.
+So I implemented the features I needed plus some nice to have ones for the completeness of feature groups. E.g. including reading from gpios even when I just use them for their output functionality.
 
 ### Side Note:
-In my project I am using a RT Preempt enabled linux kernel _(4.4.79)_ with the Armbian distribution. Due to problems of rt-patching the provided kernels of Asus _(tag/1.9 at that time, haven't tried since)_ I started with a vanilla kernel and backported a lot of changes to re-enable all functionalities I needed _(see the following link for additional information)_.
+In my project I am using a RT Preempt enabled linux kernel _(4.4.79)_ with the Armbian distribution. Due to problems of rt-patching the kernel provided by  Asus _(tag/1.9 at that time, haven't tried since)_ I started with a vanilla kernel and backported a lot of changes to re-enable all functionalities I needed _(see the following link for additional information)_.
 The forked and updated package of armbian can be found here:
 [https://github.com/arne48/armbian_build](https://github.com/arne48/armbian_build) 
 
@@ -15,7 +15,7 @@ __This might be helpful for you too. And interfaces that might interfere with th
 ## Features
 ### GPIO
 - __Input & Output__
-The library provides simple functions to setup any non-power pin to either an input or an output.
+The library provides easy to use functions to setup any non-power pin to either an Input or an Output.
 
 - __Pullup & Down settings for Inputs__
 Functions are provided to set the pulling resistors of pins. The supported types are normal, pullup, pulldown and buskeeper.
@@ -25,25 +25,25 @@ For pins operating as an output the max. drive strength can be set to 2, 4, 8 or
 
 ### SPI
 - __SPI0 and SPI2 usable__
-In image provided by Asus just enables SPI2 which then can be used by using _spidev_ via _ioctl_. This library allows it to utilize both SPI controllers.
+The image provided by Asus just enables SPI2 which then can be used by _spidev_ via _ioctl_. This library allows it to utilize both SPI controllers.
 
 - __Up tp 66.7MHz clockspeed__
-The clock-source of the clock-reset-unit are set in a way that they don't depend on the general PLL clock but the codec PLL which should be always stable. Further the divider setting allows a maximum clockspeed for the SPI controllers of up to 66.7MHz.
+The clock-sources of the clock-reset-unit for the SPI controllers are set in a way that they don't depend on the general PLL clock but are using the codec PLL which should be always stable. Further the divider setting allows a maximum clockspeed for the SPI controllers of up to 66.7MHz.
 
 - __Slave Select can be set to any free gpio or none__
-One functionality which I already missed in wiringPi was to disable the hardware slave select so it can be set by software to a wide variety of pins without sacrificing the still active hardware pin to be disconnected. To allow the most possible flexibility the slave selects were decided to be set by software internally alltogether. Implementing it like this it is now possible to use any pin as a slave select which is then automatically operated by the library. Or it is also possible to set no slave select at all and handle it by yourself with basically as much slaves as you want. 
+One functionality which I already missed in wiringPi was to disable the hardware slave select so it can be set by software to a wide variety of pins without sacrificing the still active hardware pin to be disconnected. To allow the most possible flexibility the slave selects were decided to be set by software internally alltogether. By implementing it like this it is possible to use any pin as a slave select which is then automatically operated by the library. Or it is also possible to set no slave select at all and handle it by yourself with as much slaves as needed. 
 
 - __SPI modes 0, 1, 2, 3 are supported__
-The SPI controllers themself support all 4 possible SPI modes and so does the library.
+The SPI controllers themself support all 4 available SPI modes and so does the library.
 
 - __MSB first and LSB first mode can be set__
 Via the configuration provided by the library it is possible to set the byte-order if needed.
 
 ### Examples
-The examples are located in the _examples_ directory. They provide some reference to the usage of the library.
+The examples are located in the _examples_ directory. They provide a reference to the usage of the library.
 
 - __GPIO Input__
-In this example all pins are set as inputs with pullups. Once a pin gets toggled bridging the to GND or releasing it from GND output will be prompted to the command-line. (End with Ctrl-C)
+In this example all pins are set as inputs with pullups. Once a pin gets toggled by bridging them to GND or releasing them from GND a message will be prompted to the command-line. (End with Ctrl-C)
 
 - __GPIO Output__
 In this examples all pins are set to ouput mode and are toggled in an infinite loop. (End with Ctrl-C)
@@ -57,16 +57,16 @@ The pins are numbered intuitively by their position on the header from 1 (3.3V) 
 For an overview of the header please check this image from Asus: [Link](https://dlcdnimgs.asus.com/websites/global/products/UUSx6FPuqP3uZrhv/images/pic_gpio.png)
 
 __Error Handling__
-To prevent spamming of the console errors are handled quietly. If operation is illegal it will neither crash or print an error message in those cases no operation will be executed and if applicable a default value will be returned.
+To prevent spamming of the console errors are handled quiete and gracefully. If an operation is illegal it will neither crash or print an error message in those cases no operation will be executed and in case of a non-void function a default value will be returned.
 
 #### Board Init
-_Maps the hardware into virtual memory and resets header pins to input_
+_Maps the hardware into virtual memory and resets header pins to inputs_
 __returns:__ 1 if initialization was successful otherwise returns 0
 ```cpp
 int tinkerboard_init(void);
 ```
 #### Board De-Init
-_If gpio memory is available it is resetting the header and finally unmapping virtual memory of gpio, cru and spi_
+_If gpio memory is available it resets the header and finally will unmap the virtual memory of gpio, cru and spi_
 ```cpp
 void tinkerboard_end(void);
 ```
@@ -86,7 +86,7 @@ uint32_t tinkerboard_get_grf_config(uint32_t pin_number);
 ```
 
 #### Get data direction mode of pin
-_Reads the gpio direction register for specified pin and returns its mode as enum.
+_Reads the data direction register for specified pin and returns its mode as enum.
 If requested pin is a power-pin it returns Input_
 __pin_number:__ number of pin to read the data direction config of
 __returns:__ data direction of gpio. This can be either _Input_ or _Output_
@@ -95,7 +95,7 @@ enum IOMode tinkerboard_get_gpio_mode(uint32_t pin_number);
 ```
 
 #### Set data direction mode of pin
-_Sets the data direction specified pin to Input or Output and also the grf register to gpio_
+_Sets the data direction of specified pin to Input or Output and also the grf register to gpio_
 __pin_number:__ number of pin to set the data direction for
 __mode:__ direction (_Input_ or _Output_) to set the pin to
 ```cpp
@@ -119,7 +119,7 @@ enum IOState tinkerboard_get_gpio_state(uint32_t pin_number);
 ```
 
 #### Setup pullup & down configuration of pin (relevant for Inputs)
-_This function allows to configure a pulling behaviour for a pin to prevent it from eventual floating.
+_This function allows to configure a pulling behaviour for a pin to prevent it from floating eventually.
 Available configurations are NORMAL_Z, PULLUP, PULLDOWN, BUSKEEPER._
 __pin_number:__ number of pin to set the pulling behaviour for
 __mode:__ pulling mode to set the specified pin to
@@ -183,9 +183,9 @@ struct spi_mode_config_t {
 ```
 
 ## Installation
-For compilation and installation cmake is used for convenience.
-Besides building the library its installation is also supported.
-By installing the library it is furthermore possible to use the provided cmake module to easily make use of the library within your own projects.
+For compilation and installation cmake is used.
+Besides building the library this also supports its installation.
+By installing the library it is possible to use the provided cmake module to easily make use of the library within your own projects.
 
 ### CMake make & install
 1. ```$mkdir build && cd build```

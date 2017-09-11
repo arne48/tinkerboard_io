@@ -1,28 +1,25 @@
 #include "../tinkerboard_io.h"
-#include <signal.h>
-
-void sigint_handler(int signo) {
-  if (signo == SIGINT) {
-    printf("Closing Tinker Board\n");
-    tinkerboard_end();
-  }
-}
+#include <curses.h>
 
 int main(int argc, const char *argv[]) {
 
   if (tinkerboard_init() == 1) {
+    initscr();
+    timeout(0);
     printf("Successfully initialized\n");
 
-    if (signal(SIGINT, sigint_handler) == SIG_ERR) {
-      printf("can't catch SIGINT\n");
-    }
 
     for (uint32_t idx = 1; idx <= 40; idx++) {
       tinkerboard_set_gpio_mode(idx, OUTPUT);
     }
 
+    printf("All outputs are toggling now, please check.\n");
+    printf("To stop press any key....\n");
 
-    while (1) {
+    int input = ERR;
+    while (input == ERR) {
+      input = getch();
+
       for (uint32_t idx = 1; idx <= 40; idx++) {
         tinkerboard_set_gpio_state(idx, HIGH);
       }
@@ -31,5 +28,7 @@ int main(int argc, const char *argv[]) {
         tinkerboard_set_gpio_state(idx, LOW);
       }
     }
+
+    tinkerboard_end();
   }
 }

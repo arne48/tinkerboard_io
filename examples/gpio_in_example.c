@@ -1,21 +1,12 @@
 #include "../tinkerboard_io.h"
-#include <signal.h>
-
-void sigint_handler(int signo) {
-  if (signo == SIGINT) {
-    printf("Closing Tinker Board\n");
-    tinkerboard_end();
-  }
-}
+#include <curses.h>
 
 int main(int argc, const char *argv[]) {
 
   if (tinkerboard_init() == 1) {
+    initscr();
+    timeout(0);
     printf("Successfully initialized\n");
-
-    if (signal(SIGINT, sigint_handler) == SIG_ERR) {
-      printf("can't catch SIGINT\n");
-    }
 
     // Not really needed as the initialization is setting all gpios as input
     // but not all gpios are using pullups initially
@@ -26,10 +17,14 @@ int main(int argc, const char *argv[]) {
 
     enum IOState last_states[40] = {[0 ... 39] = HIGH};
     printf("Please bridge Pin 9 (GND) to any gpio to check input function\n");
+    printf("To stop press any key....\n");
 
-
-    while (1) {
+    int input = ERR;
+    while (input == ERR) {
       for (uint32_t idx = 1; idx <= 40; idx++) {
+
+        input = getch();
+
         enum IOState current_state = tinkerboard_get_gpio_state(idx);
         if (current_state != last_states[idx - 1] && NO_POWER_PIN(idx)) {
           last_states[idx - 1] = current_state;
@@ -37,5 +32,7 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
+
+    tinkerboard_end();
   }
 }

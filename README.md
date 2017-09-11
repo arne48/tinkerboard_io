@@ -52,11 +52,11 @@ The examples are located in the _examples_ directory. They provide a reference t
 
 - __GPIO Input__
 
-In this example all pins are set as inputs with pullups. Once a pin gets toggled by bridging them to GND or releasing them from GND a message will be prompted to the command-line. (End with Ctrl-C)
+In this example all pins are set as inputs with pullups. Once a pin gets toggled by bridging them to GND or releasing them from GND a message will be prompted to the command-line. (End with any key)
 
 - __GPIO Output__
 
-In this examples all pins are set to ouput mode and are toggled in an infinite loop. (End with Ctrl-C)
+In this examples all pins are set to ouput mode and are toggled in an infinite loop. (End with any key)
 
 - __SPI__
 

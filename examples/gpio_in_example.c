@@ -26,9 +26,6 @@ int main(int argc, const char *argv[]) {
     int input = ERR;
     while (input == ERR) {
       for (uint32_t idx = 1; idx <= 40; idx++) {
-
-        input = getch();
-
         enum IOState current_state = tinkerboard_get_gpio_state(idx);
         if (current_state != last_states[idx - 1] && NO_POWER_PIN(idx)) {
           last_states[idx - 1] = current_state;
@@ -42,6 +39,7 @@ int main(int argc, const char *argv[]) {
 
         }
       }
+      input = getch();
     }
 
     tinkerboard_end();

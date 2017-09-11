@@ -22,7 +22,6 @@ int main(int argc, const char *argv[]) {
     printw("Please bridge Pin 9 (GND) to any gpio to check input function");
     move(5, 0);
     printw("To stop press any key....");
-    move(7,0);
 
     int input = ERR;
     while (input == ERR) {
@@ -34,8 +33,10 @@ int main(int argc, const char *argv[]) {
         if (current_state != last_states[idx - 1] && NO_POWER_PIN(idx)) {
           last_states[idx - 1] = current_state;
           if(current_state == HIGH) {
+            move(7,0);
             printw("Pin %d changed its state to HIGH  ", idx);
           } else {
+            move(7,0);
             printw("Pin %d changed its state to LOW   ", idx);
           }
 

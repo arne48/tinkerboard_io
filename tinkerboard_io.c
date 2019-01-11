@@ -338,6 +338,12 @@ int tinkerboard_init(void) {
 	//printf("Mapped SPI block to: %p\n", _rk3288_spi_block_base);
   }
 
+  // Enable clock gate for gpio block 0
+  _set_config(_rk3288_cru_block_base + ALIGN(RK3288_CRU_CLKGATE17_OFFSET), 4, 0, 1);
+
+  // Enable clock gate for gpio block 1-8
+  _set_config(_rk3288_cru_block_base + ALIGN(RK3288_CRU_CLKGATE14_OFFSET), 1, 0x00, 8);
+
   retcode = 1;
 
   end:
@@ -458,7 +464,7 @@ static inline void _spi_receive(enum SPIController controller, struct spi_mode_c
     else {
       *(uint16_t *) (_spi_internals[controller].rx) = (uint16_t) rxw;
     }
-    
+
     _spi_internals[controller].rx += mode_config.data_frame_size;
   }
 }
